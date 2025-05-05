@@ -1,21 +1,24 @@
 import streamlit as st
-import time
 from astropilot import AstroPilot
 
 #--- 
-# Components
+# Utils
 #---
 
-def show_markdown_file(file_path: str, idea = False) -> None:
+def show_markdown_file(file_path: str, extra_format = False) -> None:
+
     with open(file_path, "r") as f:
         response = f.read()
 
     #For the idea case, need further formatting, workaround for now:
-    if idea:
-        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").response.replace("\t\t","    ")
+    if extra_format:
+        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
 
     st.markdown(response)
 
+#--- 
+# Components
+#---
 
 def data_description(ap: AstroPilot) -> None:
 
@@ -47,7 +50,10 @@ def get_idea(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
-        show_markdown_file(ap.project_dir+"/input_files/idea.md", idea=True)
+    try:
+        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True)
+    except FileNotFoundError:
+        st.write("Idea not generated yet.")
 
 def get_methods(ap: AstroPilot) -> None:
     st.header("Methods")
@@ -61,7 +67,10 @@ def get_methods(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
+    try:
         show_markdown_file(ap.project_dir+"/input_files/methods.md")
+    except FileNotFoundError:
+        st.write("Methods not generated yet.")
         
 def get_results(ap: AstroPilot) -> None:
     st.header("Results")
@@ -75,7 +84,10 @@ def get_results(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
+    try:
         show_markdown_file(ap.project_dir+"/input_files/results.md")
+    except FileNotFoundError:
+        st.write("Results not generated yet.")
 
 def get_paper(ap: AstroPilot) -> None:
     st.header("Article")

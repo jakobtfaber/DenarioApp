@@ -7,3 +7,9 @@ Run with:
 ```
 streamlit run app.py
 ```
+
+## TODO
+
+- [x] Prerender markdown files if they exist
+- [ ] Add option to browse files
+- [ ] Add option to set ideas, methods, results, through text
