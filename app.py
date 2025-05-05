@@ -1,35 +1,27 @@
 import streamlit as st
-import time
 
 from astropilot import AstroPilot
 
 def data_description():
 
     st.header("Data description")
-    # Accept user input
-    if prompt := st.chat_input("Describe the data and tools to be used in the project."):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
 
-        astro_pilot.set_data_description(prompt)
+    data_descr = st.text_input(
+        "Describe the data and tools to be used in the project.",
+        placeholder="E.g. Use CAMELS cosmological simulations data https://github.com/franciscovillaescusa/CAMELS",
+        key=f"data_descr"
+    )
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            full_response = ""
-            assistant_response = astro_pilot.show_data_description()
-            
-            message_placeholder.markdown(assistant_response)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+    if data_descr:
+
+        astro_pilot.set_data_description(data_descr)
+
+        astropilot_response = astro_pilot.show_data_description()
+        
+        st.markdown("Data description: "+astropilot_response)
 
 
-astro_pilot = AstroPilot()
-# astro_pilot.set_data_description("Explain your data here")
-# astro_pilot.show_data_description()
+astro_pilot = AstroPilot(project_dir="project_app")
 
 astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
