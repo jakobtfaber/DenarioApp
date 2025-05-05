@@ -2,7 +2,7 @@ import streamlit as st
 
 from astropilot import AstroPilot
 
-def data_description():
+def data_description(ap: AstroPilot):
 
     st.header("Data description")
 
@@ -14,14 +14,61 @@ def data_description():
 
     if data_descr:
 
-        astro_pilot.set_data_description(data_descr)
+        ap.set_data_description(data_descr)
 
-        astropilot_response = astro_pilot.show_data_description()
+        response = ap.show_data_description()
         
-        st.markdown("Data description: "+astropilot_response)
+        st.markdown("Data description: "+response)
 
+def get_idea(ap: AstroPilot):
+    st.header("Research idea")
 
-astro_pilot = AstroPilot(project_dir="project_app")
+    st.write("Generate a research idea provided the data description.")
+    press_button = st.button("Generate", type="primary",key="get_idea")
+    if press_button:
+        ap.get_idea()
+
+        response = ap.show_idea()
+        
+        st.markdown(response)
+
+def get_method(ap: AstroPilot):
+    st.header("Methods")
+
+    st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
+    press_button = st.button("Generate", type="primary",key="get_method")
+    if press_button:
+        ap.get_method()
+
+        response = ap.show_method()
+        
+        st.markdown(response)
+
+def get_results(ap: AstroPilot):
+    st.header("Results")
+
+    st.write("Compute the results, given the methods, idea and data description.")
+    press_button = st.button("Generate", type="primary",key="get_results")
+    if press_button:
+        ap.get_results()
+
+        response = ap.show_results()
+        
+        st.markdown(response)
+
+def get_paper(ap: AstroPilot):
+    st.header("Article")
+
+    st.write("Write the article using the computed results of the research.")
+    press_button = st.button("Generate", type="primary",key="get_paper")
+    if press_button:
+        ap.get_paper()
+
+        #response = ap.show_paper()
+        
+        #st.markdown(response)
+
+ap = AstroPilot(project_dir="project_app")
 
 astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
@@ -86,4 +133,12 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-data_description()
+data_description(ap)
+
+get_idea(ap)
+
+get_method(ap)
+
+get_results(ap)
+
+get_paper(ap)
