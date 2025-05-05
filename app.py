@@ -1,8 +1,23 @@
 import streamlit as st
-
+import time
 from astropilot import AstroPilot
 
-def data_description(ap: AstroPilot):
+#--- 
+# Components
+#---
+
+def show_markdown_file(file_path: str, idea = False) -> None:
+    with open(file_path, "r") as f:
+        response = f.read()
+
+    #For the idea case, need further formatting, workaround for now:
+    if idea:
+        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").response.replace("\t\t","    ")
+
+    st.markdown(response)
+
+
+def data_description(ap: AstroPilot) -> None:
 
     st.header("Data description")
 
@@ -20,55 +35,66 @@ def data_description(ap: AstroPilot):
         
         st.markdown("Data description: "+response)
 
-def get_idea(ap: AstroPilot):
+def get_idea(ap: AstroPilot) -> None:
     st.header("Research idea")
 
     st.write("Generate a research idea provided the data description.")
     press_button = st.button("Generate", type="primary",key="get_idea")
     if press_button:
-        ap.get_idea()
 
-        response = ap.show_idea()
-        
-        st.markdown(response)
+        with st.spinner("Generating research idea...", show_time=True):
+            ap.get_idea()
 
-def get_method(ap: AstroPilot):
+        st.success("Done!")
+
+        show_markdown_file(ap.project_dir+"/input_files/idea.md", idea=True)
+
+def get_methods(ap: AstroPilot) -> None:
     st.header("Methods")
 
     st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
     press_button = st.button("Generate", type="primary",key="get_method")
     if press_button:
-        ap.get_method()
 
-        response = ap.show_method()
+        with st.spinner("Generating methods...", show_time=True):
+            ap.get_method()
+
+        st.success("Done!")
+
+        show_markdown_file(ap.project_dir+"/input_files/methods.md")
         
-        st.markdown(response)
-
-def get_results(ap: AstroPilot):
+def get_results(ap: AstroPilot) -> None:
     st.header("Results")
 
     st.write("Compute the results, given the methods, idea and data description.")
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
-        ap.get_results()
 
-        response = ap.show_results()
-        
-        st.markdown(response)
+        with st.spinner("Computing results...", show_time=True):
+            ap.get_results()
 
-def get_paper(ap: AstroPilot):
+        st.success("Done!")
+
+        show_markdown_file(ap.project_dir+"/input_files/results.md")
+
+def get_paper(ap: AstroPilot) -> None:
     st.header("Article")
 
     st.write("Write the article using the computed results of the research.")
     press_button = st.button("Generate", type="primary",key="get_paper")
     if press_button:
-        ap.get_paper()
 
-        #response = ap.show_paper()
-        
-        #st.markdown(response)
+        with st.spinner("Writing the paper...", show_time=True):
+            ap.get_paper()
 
-ap = AstroPilot(project_dir="project_app")
+        st.success("Done!")
+        st.balloons()
+
+#---
+# Initialize session
+#--- 
+
+ap = AstroPilot(project_dir="project_app", clear_project_dir=False)
 
 astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
@@ -81,8 +107,6 @@ st.set_page_config(
     menu_items=None                  # Custom options for the app menu
 )
 
-# --- Initialize Session State ---
-
 defaults = {"messages": [],
             "state": {"memory": []},
             "task_reset_key": "task_0",
@@ -94,7 +118,10 @@ for key, value in defaults.items():
 
 st.title('AstroPilot')
 
-##### Sidebar UI #####
+#---
+# Sidebar UI
+#---
+
 st.sidebar.image(astropilotimg)
 
 st.sidebar.header("LLM API keys")
@@ -120,25 +147,27 @@ for llm in LLMs:
     else:
         st.sidebar.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
 
+#---
+# Main
+#---
+
 st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing the methods, computing the results and writing the paper.")
 
 st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git)")
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Let's start chatting! 👇"}]
+tab_descr, tab_idea, tab_method, tab_restults, tab_paper = st.tabs(["Description", "Idea", "Methods", "Results", "Paper"])
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+with tab_descr:
+    data_description(ap)
 
-data_description(ap)
+with tab_idea:
+    get_idea(ap)
 
-get_idea(ap)
+with tab_method:
+    get_methods(ap)
 
-get_method(ap)
+with tab_restults:
+    get_results(ap)
 
-get_results(ap)
-
-get_paper(ap)
+with tab_paper:
+    get_paper(ap)
