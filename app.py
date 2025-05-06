@@ -139,12 +139,12 @@ st.sidebar.image(astropilotimg)
 
 st.sidebar.header("LLM API keys")
 
-LLMs = ["Google","OpenAI","Anthropic","Perplexity"]
+LLMs = ["Gemini","OpenAI","Anthropic","Perplexity"]
 
 # If API key doesn't exist, show the input field
 for llm in LLMs:
     api_key = st.sidebar.text_input(
-        f"{llm} API key for {llm}:",
+        f"{llm} API key:",
         type="password",
         key=f"{llm}_api_key_input"
     )
