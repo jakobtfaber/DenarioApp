@@ -149,24 +149,26 @@ st.sidebar.header("LLM API keys")
 
 LLMs = ["Gemini","OpenAI","Anthropic","Perplexity"]
 
-# If API key doesn't exist, show the input field
-for llm in LLMs:
-    api_key = st.sidebar.text_input(
-        f"{llm} API key:",
-        type="password",
-        key=f"{llm}_api_key_input"
-    )
-    
-    # If the user enters a key, save it and rerun to refresh the interface
-    if api_key:
-        st.session_state["LLM_API_KEYS"][llm] = api_key
-        st.rerun()
+with st.sidebar.expander("Set API keys"):
 
-    # Display status after the key is saved
-    if llm in st.session_state["LLM_API_KEYS"]:
-        st.sidebar.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
-    else:
-        st.sidebar.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
+    # If API key doesn't exist, show the input field
+    for llm in LLMs:
+        api_key = st.text_input(
+            f"{llm} API key:",
+            type="password",
+            key=f"{llm}_api_key_input"
+        )
+        
+        # If the user enters a key, save it and rerun to refresh the interface
+        if api_key:
+            st.session_state["LLM_API_KEYS"][llm] = api_key
+            st.rerun()
+
+        # Display status after the key is saved
+        if llm in st.session_state["LLM_API_KEYS"]:
+            st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
+        else:
+            st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
 
 #---
 # Main
