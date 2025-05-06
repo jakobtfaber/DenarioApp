@@ -15,3 +15,4 @@ streamlit run app.py
 - [ ] Add option to set ideas, methods, results, through text
 - [ ] Improve figures being shown in results
 - [ ] Render latex pdf in app
+- [ ] Refactor components code since there is a lot of duplication

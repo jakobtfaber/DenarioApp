@@ -31,6 +31,12 @@ def data_description(ap: AstroPilot) -> None:
         key=f"data_descr"
     )
 
+    uploaded_file = st.file_uploader("Choose a file with the data description", accept_multiple_files=False)
+
+    if uploaded_file:
+        content = uploaded_file.read().decode("utf-8")
+        ap.set_data_description(content)   
+
     if data_descr:
 
         ap.set_data_description(data_descr)
@@ -54,6 +60,12 @@ def get_idea(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
+    uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False)
+
+    if uploaded_file:
+        content = uploaded_file.read().decode("utf-8")
+        ap.set_idea(content)
+
     try:
         show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True)
     except FileNotFoundError:
@@ -70,6 +82,12 @@ def get_methods(ap: AstroPilot) -> None:
             ap.get_method()
 
         st.success("Done!")
+
+    uploaded_file = st.file_uploader("Choose a file with the research method", accept_multiple_files=False)
+
+    if uploaded_file:
+        content = uploaded_file.read().decode("utf-8")
+        ap.set_method(content)
 
     try:
         show_markdown_file(ap.project_dir+"/input_files/methods.md")
