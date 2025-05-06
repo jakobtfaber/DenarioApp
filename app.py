@@ -106,6 +106,12 @@ def get_results(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
+    uploaded_file = st.file_uploader("Choose a file with the results of the research", accept_multiple_files=False)
+
+    if uploaded_file:
+        content = uploaded_file.read().decode("utf-8")
+        ap.set_results(content)
+
     try:
         show_markdown_file(ap.project_dir+"/input_files/results.md")
     except FileNotFoundError:
