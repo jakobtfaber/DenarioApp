@@ -13,3 +13,5 @@ streamlit run app.py
 - [x] Prerender markdown files if they exist
 - [ ] Add option to browse files
 - [ ] Add option to set ideas, methods, results, through text
+- [ ] Improve figures being shown in results
+- [ ] Render latex pdf in app

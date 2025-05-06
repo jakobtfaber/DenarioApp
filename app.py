@@ -34,9 +34,10 @@ def data_description(ap: AstroPilot) -> None:
 
         ap.set_data_description(data_descr)
 
-        response = ap.show_data_description()
-        
-        st.markdown("Data description: "+response)
+        try:
+            show_markdown_file(ap.project_dir+"/input_files/data_description.md")
+        except FileNotFoundError:
+            st.write("Data description not generated yet.")
 
 def get_idea(ap: AstroPilot) -> None:
     st.header("Research idea")
@@ -165,7 +166,7 @@ for llm in LLMs:
 
 st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing the methods, computing the results and writing the paper.")
 
-st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git)")
+st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git).")
 
 tab_descr, tab_idea, tab_method, tab_restults, tab_paper = st.tabs(["Description", "Idea", "Methods", "Results", "Paper"])
 
