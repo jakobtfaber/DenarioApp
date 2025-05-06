@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot
 
 #--- 
@@ -34,10 +35,12 @@ def data_description(ap: AstroPilot) -> None:
 
         ap.set_data_description(data_descr)
 
-        try:
-            show_markdown_file(ap.project_dir+"/input_files/data_description.md")
-        except FileNotFoundError:
-            st.write("Data description not generated yet.")
+    st.markdown("### Current data description:")
+
+    try:
+        show_markdown_file(ap.project_dir+"/input_files/data_description.md")
+    except FileNotFoundError:
+        st.write("Data description not generated yet.")
 
 def get_idea(ap: AstroPilot) -> None:
     st.header("Research idea")
@@ -102,6 +105,11 @@ def get_paper(ap: AstroPilot) -> None:
 
         st.success("Done!")
         st.balloons()
+
+    try:
+        pdf_viewer(ap.project_dir+"/input_files/paper_v4.pdf")
+    except FileNotFoundError:
+        st.write("Paper not generated yet.")
 
 #---
 # Initialize session
