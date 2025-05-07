@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot
+import os
 
 #--- 
 # Utils
@@ -146,7 +147,7 @@ astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da2
 
 # streamlit configuration
 st.set_page_config(
-    page_title="AstroPilot",         # Title of the app (shown in browser tab)
+    page_title="ResearchPilot",         # Title of the app (shown in browser tab)
     page_icon=astropilotimg,         # Favicon (icon in browser tab)
     layout="wide",                   # Page layout (options: "centered" or "wide")
     initial_sidebar_state="auto",    # Sidebar behavior
@@ -162,7 +163,7 @@ for key, value in defaults.items():
         st.session_state[key] = value
 
 
-st.title('AstroPilot')
+st.title('ResearchPilot')
 
 #---
 # Sidebar UI
@@ -189,8 +190,12 @@ with st.sidebar.expander("Set API keys"):
             st.session_state["LLM_API_KEYS"][llm] = api_key
             st.rerun()
 
+        # Check both session state and environment variables
+        env_var_name = f"{llm.upper()}_API_KEY"
+        has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
+        
         # Display status after the key is saved
-        if llm in st.session_state["LLM_API_KEYS"]:
+        if has_key:
             st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
         else:
             st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
