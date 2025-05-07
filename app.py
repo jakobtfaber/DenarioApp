@@ -177,7 +177,7 @@ astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da2
 # streamlit configuration
 st.set_page_config(
     page_title="ResearchPilot",         # Title of the app (shown in browser tab)
-    page_icon=astropilotimg,         # Favicon (icon in browser tab)
+    # page_icon=astropilotimg,         # Favicon (icon in browser tab)
     layout="wide",                   # Page layout (options: "centered" or "wide")
     initial_sidebar_state="auto",    # Sidebar behavior
     menu_items=None                  # Custom options for the app menu
@@ -198,9 +198,11 @@ st.title('ResearchPilot')
 # Sidebar UI
 #---
 
-st.sidebar.image(astropilotimg)
+# st.sidebar.image(astropilotimg)
 
-st.sidebar.header("LLM API keys")
+st.sidebar.header("API keys")
+st.sidebar.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
+
 
 LLMs = ["Gemini","OpenAI","Anthropic","Perplexity"]
 
