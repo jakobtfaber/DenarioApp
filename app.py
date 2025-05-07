@@ -28,7 +28,7 @@ def data_description(ap: AstroPilot) -> None:
 
     data_descr = st.text_area(
         "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
-        placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using Python and NumPy. This data includes time-series measurements from a particle detector.",
+        placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
         key="data_descr",
         height=100  # You can adjust the height as needed
     )
