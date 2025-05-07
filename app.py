@@ -1,176 +1,8 @@
 import streamlit as st
-from streamlit_pdf_viewer import pdf_viewer
-from astropilot import AstroPilot, Journal
+from astropilot import AstroPilot
 import os
 
-#--- 
-# Utils
-#---
-
-def show_markdown_file(file_path: str, extra_format = False) -> None:
-
-    with open(file_path, "r") as f:
-        response = f.read()
-
-    #For the idea case, need further formatting, workaround for now:
-    if extra_format:
-        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
-
-    st.markdown(response)
-
-#--- 
-# Components
-#---
-
-def data_description(ap: AstroPilot) -> None:
-
-    st.header("Data description")
-
-    data_descr = st.text_area(
-        "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
-        placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
-        key="data_descr",
-        height=100  # You can adjust the height as needed
-    )
-
-    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
-
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        ap.set_data_description(content)   
-
-    if data_descr:
-
-        ap.set_data_description(data_descr)
-
-    st.markdown("### Current data description:")
-
-    try:
-        show_markdown_file(ap.project_dir+"/input_files/data_description.md")
-    except FileNotFoundError:
-        st.write("Data description not generated yet.")
-
-def get_idea(ap: AstroPilot) -> None:
-    st.header("Research idea")
-
-    st.write("Generate a research idea provided the data description.")
-    press_button = st.button("Generate", type="primary",key="get_idea")
-    if press_button:
-
-        with st.spinner("Generating research idea...", show_time=True):
-            ap.get_idea()
-
-        st.success("Done!")
-
-    uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False)
-
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        ap.set_idea(content)
-
-    try:
-        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True)
-    except FileNotFoundError:
-        st.write("Idea not generated yet.")
-
-def get_methods(ap: AstroPilot) -> None:
-    st.header("Methods")
-
-    st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
-    press_button = st.button("Generate", type="primary",key="get_method")
-    if press_button:
-
-        with st.spinner("Generating methods...", show_time=True):
-            ap.get_method()
-
-        st.success("Done!")
-
-    uploaded_file = st.file_uploader("Choose a file with the research method", accept_multiple_files=False)
-
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        ap.set_method(content)
-
-    try:
-        show_markdown_file(ap.project_dir+"/input_files/methods.md")
-    except FileNotFoundError:
-        st.write("Methods not generated yet.")
-        
-def get_results(ap: AstroPilot) -> None:
-    st.header("Results")
-
-    st.write("Compute the results, given the methods, idea and data description.")
-    press_button = st.button("Generate", type="primary",key="get_results")
-    if press_button:
-
-        with st.spinner("Computing results...", show_time=True):
-            ap.get_results()
-
-        st.success("Done!")
-
-    uploaded_file = st.file_uploader("Choose a file with the results of the research", accept_multiple_files=False)
-
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        ap.set_results(content)
-
-    try:
-        show_markdown_file(ap.project_dir+"/input_files/results.md")
-    except FileNotFoundError:
-        st.write("Results not generated yet.")
-
-def get_paper(ap: AstroPilot) -> None:
-    st.header("Article")
-
-    st.write("Write the article using the computed results of the research.")
-
-    selected_journal = st.selectbox(
-        "Choose the journal for the latex style:",
-        [j.value for j in Journal],
-        index=0, key="journal_select")
-
-    press_button = st.button("Generate", type="primary",key="get_paper")
-    if press_button:
-
-        with st.spinner("Writing the paper...", show_time=True):
-            ap.get_paper(journal=selected_journal)
-
-        st.success("Done!")
-        st.balloons()
-
-    try:
-        pdf_viewer(ap.project_dir+"/input_files/paper_v4.pdf")
-    except FileNotFoundError:
-        st.write("Paper not generated yet.")
-
-def get_keywords(ap: AstroPilot) -> None:
-    st.header("Keywords")
-
-    st.write("Generate keywords from your research text.")
-    
-    input_text = st.text_area(
-        "Enter your research text to extract keywords:",
-        placeholder="Multi-agent systems (MAS) utilizing multiple Large Language Model agents with Retrieval Augmented Generation and that can execute code locally may become beneficial in cosmological data analysis. Here, we illustrate a first small step towards AI-assisted analyses and a glimpse of the potential of MAS to automate and optimize scientific workflows in Cosmology. The system architecture of our example package, that builds upon the autogen/ag2 framework, can be applied to MAS in any area of quantitative scientific research. The particular task we apply our methods to is the cosmological parameter analysis of the Atacama Cosmology Telescope lensing power spectrum likelihood using Monte Carlo Markov Chains. Our work-in-progress code is open source and available at this https URL.",
-        height=200
-    )
-    
-    n_keywords = st.slider("Number of keywords to generate:", min_value=1, max_value=10, value=5)
-    
-    press_button = st.button("Generate Keywords", type="primary", key="get_keywords")
-    
-    if press_button and input_text:
-        with st.spinner("Generating keywords..."):
-            ap.get_keywords(input_text, n_keywords=n_keywords)
-            
-            if hasattr(ap.research, 'keywords') and ap.research.keywords:
-                st.success("Keywords generated!")
-                st.write("### Generated Keywords:")
-                for keyword, url in ap.research.keywords.items():
-                    st.markdown(f"- [{keyword}]({url})")
-            else:
-                st.error("No keywords were generated. Please try again with different text.")
-    elif press_button and not input_text:
-        st.warning("Please enter some text to generate keywords.")
+from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
 
 #---
 # Initialize session
@@ -255,19 +87,19 @@ tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs
 ])
 
 with tab_descr:
-    data_description(ap)
+    description_comp(ap)
 
 with tab_idea:
-    get_idea(ap)
+    idea_comp(ap)
 
 with tab_method:
-    get_methods(ap)
+    method_comp(ap)
 
 with tab_restults:
-    get_results(ap)
+    results_comp(ap)
 
 with tab_paper:
-    get_paper(ap)
+    paper_comp(ap)
 
 with tab_keywords:
-    get_keywords(ap)
+    keywords_comp(ap)

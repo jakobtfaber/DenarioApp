@@ -35,5 +35,5 @@ RUN pip install .
 # This informs Docker that the container will listen on port 5000 at runtime.
 EXPOSE 8501
 
-# Command to run your app (adjust as needed)
-CMD ["streamlit", "run", "app.py"]
+# Command to run the app
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
