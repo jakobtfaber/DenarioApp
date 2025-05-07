@@ -137,6 +137,35 @@ def get_paper(ap: AstroPilot) -> None:
     except FileNotFoundError:
         st.write("Paper not generated yet.")
 
+def get_keywords(ap: AstroPilot) -> None:
+    st.header("Keywords")
+
+    st.write("Generate keywords from your research text.")
+    
+    input_text = st.text_area(
+        "Enter your research text to extract keywords:",
+        placeholder="Multi-agent systems (MAS) utilizing multiple Large Language Model agents with Retrieval Augmented Generation and that can execute code locally may become beneficial in cosmological data analysis. Here, we illustrate a first small step towards AI-assisted analyses and a glimpse of the potential of MAS to automate and optimize scientific workflows in Cosmology. The system architecture of our example package, that builds upon the autogen/ag2 framework, can be applied to MAS in any area of quantitative scientific research. The particular task we apply our methods to is the cosmological parameter analysis of the Atacama Cosmology Telescope lensing power spectrum likelihood using Monte Carlo Markov Chains. Our work-in-progress code is open source and available at this https URL.",
+        height=200
+    )
+    
+    n_keywords = st.slider("Number of keywords to generate:", min_value=1, max_value=10, value=5)
+    
+    press_button = st.button("Generate Keywords", type="primary", key="get_keywords")
+    
+    if press_button and input_text:
+        with st.spinner("Generating keywords..."):
+            ap.get_keywords(input_text, n_keywords=n_keywords)
+            
+            if hasattr(ap.research, 'keywords') and ap.research.keywords:
+                st.success("Keywords generated!")
+                st.write("### Generated Keywords:")
+                for keyword, url in ap.research.keywords.items():
+                    st.markdown(f"- [{keyword}]({url})")
+            else:
+                st.error("No keywords were generated. Please try again with different text.")
+    elif press_button and not input_text:
+        st.warning("Please enter some text to generate keywords.")
+
 #---
 # Initialize session
 #--- 
@@ -208,7 +237,14 @@ st.write("AI agents to assist the development of a scientific research process. 
 
 st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git).")
 
-tab_descr, tab_idea, tab_method, tab_restults, tab_paper = st.tabs(["Description", "Idea", "Methods", "Results", "Paper"])
+tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs([
+    "**Description**", 
+    "**Idea**", 
+    "**Methods**", 
+    "**Results**", 
+    "**Paper**", 
+    "Keywords"
+])
 
 with tab_descr:
     data_description(ap)
@@ -224,3 +260,6 @@ with tab_restults:
 
 with tab_paper:
     get_paper(ap)
+
+with tab_keywords:
+    get_keywords(ap)
