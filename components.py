@@ -60,7 +60,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
         idea_maker_model = st.selectbox(
             "Idea Maker Model",
-            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219", "gemini-2.0-flash-lite"],
+            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219"],#, "gemini-2.0-flash-lite"],
             index=0,
             key="idea_maker_model"
         )
@@ -68,7 +68,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
         idea_hater_model = st.selectbox(
             "Idea Hater Model",
-            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219", "gemini-2.0-flash-lite"],
+            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219"],#, "gemini-2.0-flash-lite"],
             index=1,
             key="idea_hater_model"
         )

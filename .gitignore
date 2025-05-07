@@ -2,3 +2,4 @@ cmbaget_output/
 .cache/
 *.whl
 project_app/
+__pycache__/
