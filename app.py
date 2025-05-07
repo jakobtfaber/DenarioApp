@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
-from astropilot import AstroPilot
+from astropilot import AstroPilot, Journal
 import os
 
 #--- 
@@ -123,11 +123,17 @@ def get_paper(ap: AstroPilot) -> None:
     st.header("Article")
 
     st.write("Write the article using the computed results of the research.")
+
+    selected_journal = st.selectbox(
+        "Choose the journal for the latex style:",
+        [j.value for j in Journal],
+        index=0, key="journal_select")
+
     press_button = st.button("Generate", type="primary",key="get_paper")
     if press_button:
 
         with st.spinner("Writing the paper...", show_time=True):
-            ap.get_paper()
+            ap.get_paper(journal=selected_journal)
 
         st.success("Done!")
         st.balloons()
