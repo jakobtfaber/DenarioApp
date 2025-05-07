@@ -1,0 +1,10 @@
+[project]
+name = "astropilotapp"
+version = "0.1.0"
+description = "GUI for AstroPilot"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit",
+    "streamlit-pdf-viewer>=0.0.23",
+    ]
