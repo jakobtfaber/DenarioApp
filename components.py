@@ -53,11 +53,31 @@ def idea_comp(ap: AstroPilot) -> None:
     st.header("Research idea")
 
     st.write("Generate a research idea provided the data description.")
+    
+    # Add model selection dropdowns
+    col1, col2 = st.columns(2)
+    with col1:
+        st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
+        idea_maker_model = st.selectbox(
+            "Idea Maker Model",
+            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219", "gemini-2.0-flash-lite"],
+            index=0,
+            key="idea_maker_model"
+        )
+    with col2:
+        st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
+        idea_hater_model = st.selectbox(
+            "Idea Hater Model",
+            ["gpt-4o-2024-11-20", "claude-3-7-sonnet-20250219", "gemini-2.0-flash-lite"],
+            index=1,
+            key="idea_hater_model"
+        )
+    
     press_button = st.button("Generate", type="primary",key="get_idea")
     if press_button:
 
         with st.spinner("Generating research idea...", show_time=True):
-            ap.get_idea()
+            ap.get_idea(idea_maker_model=idea_maker_model, idea_hater_model=idea_hater_model)
 
         st.success("Done!")
 
