@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot
+import os
 
 #--- 
 # Utils
@@ -25,13 +26,14 @@ def data_description(ap: AstroPilot) -> None:
 
     st.header("Data description")
 
-    data_descr = st.text_input(
-        "Describe the data and tools to be used in the project.",
-        placeholder="E.g. Use CAMELS cosmological simulations data https://github.com/franciscovillaescusa/CAMELS",
-        key=f"data_descr"
+    data_descr = st.text_area(
+        "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
+        placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
+        key="data_descr",
+        height=100  # You can adjust the height as needed
     )
 
-    uploaded_file = st.file_uploader("Choose a file with the data description", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
@@ -135,6 +137,35 @@ def get_paper(ap: AstroPilot) -> None:
     except FileNotFoundError:
         st.write("Paper not generated yet.")
 
+def get_keywords(ap: AstroPilot) -> None:
+    st.header("Keywords")
+
+    st.write("Generate keywords from your research text.")
+    
+    input_text = st.text_area(
+        "Enter your research text to extract keywords:",
+        placeholder="Multi-agent systems (MAS) utilizing multiple Large Language Model agents with Retrieval Augmented Generation and that can execute code locally may become beneficial in cosmological data analysis. Here, we illustrate a first small step towards AI-assisted analyses and a glimpse of the potential of MAS to automate and optimize scientific workflows in Cosmology. The system architecture of our example package, that builds upon the autogen/ag2 framework, can be applied to MAS in any area of quantitative scientific research. The particular task we apply our methods to is the cosmological parameter analysis of the Atacama Cosmology Telescope lensing power spectrum likelihood using Monte Carlo Markov Chains. Our work-in-progress code is open source and available at this https URL.",
+        height=200
+    )
+    
+    n_keywords = st.slider("Number of keywords to generate:", min_value=1, max_value=10, value=5)
+    
+    press_button = st.button("Generate Keywords", type="primary", key="get_keywords")
+    
+    if press_button and input_text:
+        with st.spinner("Generating keywords..."):
+            ap.get_keywords(input_text, n_keywords=n_keywords)
+            
+            if hasattr(ap.research, 'keywords') and ap.research.keywords:
+                st.success("Keywords generated!")
+                st.write("### Generated Keywords:")
+                for keyword, url in ap.research.keywords.items():
+                    st.markdown(f"- [{keyword}]({url})")
+            else:
+                st.error("No keywords were generated. Please try again with different text.")
+    elif press_button and not input_text:
+        st.warning("Please enter some text to generate keywords.")
+
 #---
 # Initialize session
 #--- 
@@ -145,8 +176,8 @@ astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da2
 
 # streamlit configuration
 st.set_page_config(
-    page_title="AstroPilot",         # Title of the app (shown in browser tab)
-    page_icon=astropilotimg,         # Favicon (icon in browser tab)
+    page_title="ResearchPilot",         # Title of the app (shown in browser tab)
+    # page_icon=astropilotimg,         # Favicon (icon in browser tab)
     layout="wide",                   # Page layout (options: "centered" or "wide")
     initial_sidebar_state="auto",    # Sidebar behavior
     menu_items=None                  # Custom options for the app menu
@@ -161,15 +192,17 @@ for key, value in defaults.items():
         st.session_state[key] = value
 
 
-st.title('AstroPilot')
+st.title('ResearchPilot')
 
 #---
 # Sidebar UI
 #---
 
-st.sidebar.image(astropilotimg)
+# st.sidebar.image(astropilotimg)
 
-st.sidebar.header("LLM API keys")
+st.sidebar.header("API keys")
+st.sidebar.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
+
 
 LLMs = ["Gemini","OpenAI","Anthropic","Perplexity"]
 
@@ -188,8 +221,12 @@ with st.sidebar.expander("Set API keys"):
             st.session_state["LLM_API_KEYS"][llm] = api_key
             st.rerun()
 
+        # Check both session state and environment variables
+        env_var_name = f"{llm.upper()}_API_KEY"
+        has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
+        
         # Display status after the key is saved
-        if llm in st.session_state["LLM_API_KEYS"]:
+        if has_key:
             st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
         else:
             st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
@@ -202,7 +239,14 @@ st.write("AI agents to assist the development of a scientific research process. 
 
 st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git).")
 
-tab_descr, tab_idea, tab_method, tab_restults, tab_paper = st.tabs(["Description", "Idea", "Methods", "Results", "Paper"])
+tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs([
+    "**Description**", 
+    "**Idea**", 
+    "**Methods**", 
+    "**Results**", 
+    "**Paper**", 
+    "Keywords"
+])
 
 with tab_descr:
     data_description(ap)
@@ -218,3 +262,6 @@ with tab_restults:
 
 with tab_paper:
     get_paper(ap)
+
+with tab_keywords:
+    get_keywords(ap)
