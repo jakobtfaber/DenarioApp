@@ -25,13 +25,14 @@ def data_description(ap: AstroPilot) -> None:
 
     st.header("Data description")
 
-    data_descr = st.text_input(
-        "Describe the data and tools to be used in the project.",
-        placeholder="E.g. Use CAMELS cosmological simulations data https://github.com/franciscovillaescusa/CAMELS",
-        key=f"data_descr"
+    data_descr = st.text_area(
+        "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
+        placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using Python and NumPy. This data includes time-series measurements from a particle detector.",
+        key="data_descr",
+        height=100  # You can adjust the height as needed
     )
 
-    uploaded_file = st.file_uploader("Choose a file with the data description", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
