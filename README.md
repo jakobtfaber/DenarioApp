@@ -39,5 +39,6 @@ docker run --rm -v "$PWD" astropilot-app
 - [ ] Download files
 - [ ] Upload .env directly
 - [ ] Print console log in GUI
+- [ ] Allow to upload .env 
 
 

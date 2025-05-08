@@ -2,30 +2,7 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
 
-from constants import PROJECT_DIR
-
-#--- 
-# Utils
-#---
-
-def show_markdown_file(file_path: str, extra_format = False) -> None:
-
-    with open(file_path, "r") as f:
-        response = f.read()
-
-    #For the idea case, need further formatting, workaround for now:
-    if extra_format:
-        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
-
-    st.download_button(
-            label="Download",
-            data=response,
-            file_name=file_path.replace(PROJECT_DIR+"/input_files/",""),
-            mime="text/plain",
-            icon=":material/download:",
-        )
-
-    st.markdown(response)
+from utils import show_markdown_file
 
 #--- 
 # Components
@@ -60,8 +37,8 @@ def description_comp(ap: AstroPilot) -> None:
         st.write("Data description not generated yet.")
 
 def idea_comp(ap: AstroPilot) -> None:
-    st.header("Research idea")
 
+    st.header("Research idea")
     st.write("Generate a research idea provided the data description.")
     
     # Add model selection dropdowns
@@ -103,9 +80,10 @@ def idea_comp(ap: AstroPilot) -> None:
         st.write("Idea not generated yet.")
 
 def method_comp(ap: AstroPilot) -> None:
-    st.header("Methods")
 
+    st.header("Methods")
     st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
+
     press_button = st.button("Generate", type="primary",key="get_method")
     if press_button:
 
@@ -126,9 +104,10 @@ def method_comp(ap: AstroPilot) -> None:
         st.write("Methods not generated yet.")
         
 def results_comp(ap: AstroPilot) -> None:
-    st.header("Results")
 
+    st.header("Results")
     st.write("Compute the results, given the methods, idea and data description.")
+
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
@@ -149,8 +128,8 @@ def results_comp(ap: AstroPilot) -> None:
         st.write("Results not generated yet.")
 
 def paper_comp(ap: AstroPilot) -> None:
-    st.header("Article")
 
+    st.header("Article")
     st.write("Write the article using the computed results of the research.")
 
     selected_journal = st.selectbox(
@@ -173,8 +152,8 @@ def paper_comp(ap: AstroPilot) -> None:
         st.write("Paper not generated yet.")
 
 def keywords_comp(ap: AstroPilot) -> None:
-    st.header("Keywords")
 
+    st.header("Keywords")
     st.write("Generate keywords from your research text.")
     
     input_text = st.text_area(

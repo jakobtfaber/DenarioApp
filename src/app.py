@@ -4,6 +4,7 @@ import os
 
 from constants import PROJECT_DIR, LLMs, llms_keys
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
+from utils import extract_api_keys
 
 #---
 # Initialize session
@@ -60,6 +61,22 @@ with st.sidebar.expander("Set API keys"):
             st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
         else:
             st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
+
+    st.markdown("""Or just upload a .env file with the keys:
+                ```
+                OPENAI_API_KEY="..."
+                ANTHROPIC_API_KEY="..."
+                GEMINI_API_KEY="..."
+                PERPLEXITY_API_KEY="..."
+                ```
+                """)
+    uploaded_dotenv = st.file_uploader("Upload the .env file", accept_multiple_files=False)
+
+    if uploaded_dotenv:
+        keys = extract_api_keys(uploaded_dotenv)
+        # st.markdown(keys)
+        for key, value in keys.items():
+            os.environ[key] = value
 
 #---
 # Main
