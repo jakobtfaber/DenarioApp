@@ -16,7 +16,7 @@ def description_comp(ap: AstroPilot) -> None:
         "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
         placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
         key="data_descr",
-        height=100  # You can adjust the height as needed
+        height=100
     )
 
     uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
@@ -147,9 +147,39 @@ def paper_comp(ap: AstroPilot) -> None:
         st.balloons()
 
     try:
-        pdf_viewer(ap.project_dir+"/input_files/paper_v4.pdf")
+
+        texfile = ap.project_dir+"/input_files/paper_v4.tex"
+
+        with open(texfile, "r") as f:
+            response = f.read()
+
+        st.download_button(
+            label="Download latex file",
+            data=response,
+            file_name=texfile.replace(ap.project_dir+"/input_files/",""),
+            # mime="text/plain",
+            icon=":material/download:",
+        )
+
     except FileNotFoundError:
-        st.write("Paper not generated yet.")
+        st.write("Latex not generated yet.")
+
+    try:
+
+        pdffile = ap.project_dir+"/input_files/paper_v4.pdf"
+
+        with open(pdffile, "rb") as pdf_file:
+            PDFbyte = pdf_file.read()
+
+        st.download_button(label="Download pdf",
+                    data=PDFbyte,
+                    file_name="paper.pdf",
+                    mime='application/octet-stream')
+
+        pdf_viewer(pdffile)
+
+    except FileNotFoundError:
+        st.write("Pdf not generated yet.")
 
 def keywords_comp(ap: AstroPilot) -> None:
 

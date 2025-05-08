@@ -32,13 +32,14 @@ docker run --rm -v "$PWD" astropilot-app
 - [x] Render latex pdf in app
 - [ ] Refactor components code since there is a lot of duplication
 - [x] Add keywords tab
-- [ ] Allow for providing API keys through the sidebar
+- [x] Allow for providing API keys through the sidebar
 - [ ] Show total computing time
-- [ ] Run in Docker
+- [x] Run in Docker
 - [ ] Include API validators
-- [ ] Download files
-- [ ] Upload .env directly
+- [x] Download .md files
+- [x] Upload .env directly
 - [ ] Print console log in GUI
-- [ ] Allow to upload .env 
+- [ ] Show files in project
+- [ ] Allow to download plots, tex and pdf
 
 
