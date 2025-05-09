@@ -7,7 +7,7 @@ GUI for [AstroPilot](https://github.com/AstroPilot-AI/AstroPilot.git) powered by
 Run with:
 
 ```bash
-streamlit run app.py
+streamlit run src/app.py
 ```
 
 ## Run in Docker
@@ -35,4 +35,9 @@ docker run --rm -v "$PWD" astropilot-app
 - [ ] Allow for providing API keys through the sidebar
 - [ ] Show total computing time
 - [ ] Run in Docker
+- [ ] Include API validators
+- [ ] Download files
+- [ ] Upload .env directly
+- [ ] Print console log in GUI
+
 

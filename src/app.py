@@ -2,13 +2,14 @@ import streamlit as st
 from astropilot import AstroPilot
 import os
 
+from constants import PROJECT_DIR, LLMs, llms_keys
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
 
 #---
 # Initialize session
 #--- 
 
-ap = AstroPilot(project_dir="project_app", clear_project_dir=False)
+ap = AstroPilot(project_dir=PROJECT_DIR, clear_project_dir=False)
 
 astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
@@ -21,14 +22,7 @@ st.set_page_config(
     menu_items=None                  # Custom options for the app menu
 )
 
-defaults = {"messages": [],
-            "state": {"memory": []},
-            "task_reset_key": "task_0",
-            "LLM_API_KEYS": {}}
-for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
-
+st.session_state["LLM_API_KEYS"] = {}
 
 st.title('ResearchPilot')
 
@@ -40,9 +34,6 @@ st.title('ResearchPilot')
 
 st.sidebar.header("API keys")
 st.sidebar.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
-
-
-LLMs = ["Gemini","OpenAI","Anthropic","Perplexity"]
 
 with st.sidebar.expander("Set API keys"):
 
@@ -57,8 +48,9 @@ with st.sidebar.expander("Set API keys"):
         # If the user enters a key, save it and rerun to refresh the interface
         if api_key:
             st.session_state["LLM_API_KEYS"][llm] = api_key
-            st.rerun()
 
+            os.environ[llms_keys[llm]] = api_key
+            
         # Check both session state and environment variables
         env_var_name = f"{llm.upper()}_API_KEY"
         has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)

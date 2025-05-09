@@ -2,6 +2,8 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
 
+from constants import PROJECT_DIR
+
 #--- 
 # Utils
 #---
@@ -14,6 +16,14 @@ def show_markdown_file(file_path: str, extra_format = False) -> None:
     #For the idea case, need further formatting, workaround for now:
     if extra_format:
         response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
+
+    st.download_button(
+            label="Download",
+            data=response,
+            file_name=file_path.replace(PROJECT_DIR+"/input_files/",""),
+            mime="text/plain",
+            icon=":material/download:",
+        )
 
     st.markdown(response)
 
