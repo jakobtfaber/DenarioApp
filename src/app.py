@@ -69,12 +69,13 @@ with st.sidebar.expander("Set API keys"):
                 GEMINI_API_KEY="..."
                 PERPLEXITY_API_KEY="..."
                 ```
+                and reload the page
                 """)
     uploaded_dotenv = st.file_uploader("Upload the .env file", accept_multiple_files=False)
 
     if uploaded_dotenv:
         keys = extract_api_keys(uploaded_dotenv)
-        # st.markdown(keys)
+
         for key, value in keys.items():
             os.environ[key] = value
 

@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
 
-from utils import show_markdown_file
+from utils import show_markdown_file, create_zip_in_memory
 
 #--- 
 # Components
@@ -32,7 +32,7 @@ def description_comp(ap: AstroPilot) -> None:
     st.markdown("### Current data description:")
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/data_description.md")
+        show_markdown_file(ap.project_dir+"/input_files/data_description.md",label="data description")
     except FileNotFoundError:
         st.write("Data description not generated yet.")
 
@@ -75,7 +75,7 @@ def idea_comp(ap: AstroPilot) -> None:
         ap.set_idea(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True)
+        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
     except FileNotFoundError:
         st.write("Idea not generated yet.")
 
@@ -92,14 +92,14 @@ def method_comp(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
-    uploaded_file = st.file_uploader("Choose a file with the research method", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False)
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
         ap.set_method(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/methods.md")
+        show_markdown_file(ap.project_dir+"/input_files/methods.md",label="methods")
     except FileNotFoundError:
         st.write("Methods not generated yet.")
         
@@ -123,7 +123,19 @@ def results_comp(ap: AstroPilot) -> None:
         ap.set_results(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/results.md")
+
+        zip_data = create_zip_in_memory(ap.project_dir+"/input_files/plots")
+
+        st.download_button(
+            label="Download plots",
+            data=zip_data,
+            file_name="plots.zip",
+            mime="application/zip",
+            icon=":material/download:",
+        )
+
+        show_markdown_file(ap.project_dir+"/input_files/results.md",label="results")
+
     except FileNotFoundError:
         st.write("Results not generated yet.")
 
@@ -148,16 +160,19 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        texfile = ap.project_dir+"/input_files/paper_v4.tex"
+        texfile = ap.project_dir+"/Paper/paper_v4.tex"
 
+        # Ensure that the .tex has been created and we can read it
         with open(texfile, "r") as f:
-            response = f.read()
+            f.read()
+
+        zip_data = create_zip_in_memory(ap.project_dir+"/Paper")
 
         st.download_button(
-            label="Download latex file",
-            data=response,
-            file_name=texfile.replace(ap.project_dir+"/input_files/",""),
-            # mime="text/plain",
+            label="Download latex files",
+            data=zip_data,
+            file_name="paper.zip",
+            mime="application/zip",
             icon=":material/download:",
         )
 
@@ -166,7 +181,7 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        pdffile = ap.project_dir+"/input_files/paper_v4.pdf"
+        pdffile = ap.project_dir+"/Paper/paper_v4.pdf"
 
         with open(pdffile, "rb") as pdf_file:
             PDFbyte = pdf_file.read()
