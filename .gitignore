@@ -3,3 +3,4 @@ cmbaget_output/
 *.whl
 project_app/
 __pycache__/
+.DS_Store
