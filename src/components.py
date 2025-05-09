@@ -2,30 +2,7 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
 
-from constants import PROJECT_DIR
-
-#--- 
-# Utils
-#---
-
-def show_markdown_file(file_path: str, extra_format = False) -> None:
-
-    with open(file_path, "r") as f:
-        response = f.read()
-
-    #For the idea case, need further formatting, workaround for now:
-    if extra_format:
-        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
-
-    st.download_button(
-            label="Download",
-            data=response,
-            file_name=file_path.replace(PROJECT_DIR+"/input_files/",""),
-            mime="text/plain",
-            icon=":material/download:",
-        )
-
-    st.markdown(response)
+from utils import show_markdown_file, create_zip_in_memory
 
 #--- 
 # Components
@@ -39,7 +16,7 @@ def description_comp(ap: AstroPilot) -> None:
         "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
         placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
         key="data_descr",
-        height=100  # You can adjust the height as needed
+        height=100
     )
 
     uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
@@ -55,13 +32,13 @@ def description_comp(ap: AstroPilot) -> None:
     st.markdown("### Current data description:")
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/data_description.md")
+        show_markdown_file(ap.project_dir+"/input_files/data_description.md",label="data description")
     except FileNotFoundError:
         st.write("Data description not generated yet.")
 
 def idea_comp(ap: AstroPilot) -> None:
-    st.header("Research idea")
 
+    st.header("Research idea")
     st.write("Generate a research idea provided the data description.")
     
     # Add model selection dropdowns
@@ -98,14 +75,15 @@ def idea_comp(ap: AstroPilot) -> None:
         ap.set_idea(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True)
+        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
     except FileNotFoundError:
         st.write("Idea not generated yet.")
 
 def method_comp(ap: AstroPilot) -> None:
-    st.header("Methods")
 
+    st.header("Methods")
     st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
+
     press_button = st.button("Generate", type="primary",key="get_method")
     if press_button:
 
@@ -114,21 +92,22 @@ def method_comp(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
-    uploaded_file = st.file_uploader("Choose a file with the research method", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False)
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
         ap.set_method(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/methods.md")
+        show_markdown_file(ap.project_dir+"/input_files/methods.md",label="methods")
     except FileNotFoundError:
         st.write("Methods not generated yet.")
         
 def results_comp(ap: AstroPilot) -> None:
-    st.header("Results")
 
+    st.header("Results")
     st.write("Compute the results, given the methods, idea and data description.")
+
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
@@ -144,13 +123,25 @@ def results_comp(ap: AstroPilot) -> None:
         ap.set_results(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/results.md")
+
+        zip_data = create_zip_in_memory(ap.project_dir+"/input_files/plots")
+
+        st.download_button(
+            label="Download plots",
+            data=zip_data,
+            file_name="plots.zip",
+            mime="application/zip",
+            icon=":material/download:",
+        )
+
+        show_markdown_file(ap.project_dir+"/input_files/results.md",label="results")
+
     except FileNotFoundError:
         st.write("Results not generated yet.")
 
 def paper_comp(ap: AstroPilot) -> None:
-    st.header("Article")
 
+    st.header("Article")
     st.write("Write the article using the computed results of the research.")
 
     selected_journal = st.selectbox(
@@ -168,13 +159,46 @@ def paper_comp(ap: AstroPilot) -> None:
         st.balloons()
 
     try:
-        pdf_viewer(ap.project_dir+"/input_files/paper_v4.pdf")
+
+        texfile = ap.project_dir+"/Paper/paper_v4.tex"
+
+        # Ensure that the .tex has been created and we can read it
+        with open(texfile, "r") as f:
+            f.read()
+
+        zip_data = create_zip_in_memory(ap.project_dir+"/Paper")
+
+        st.download_button(
+            label="Download latex files",
+            data=zip_data,
+            file_name="paper.zip",
+            mime="application/zip",
+            icon=":material/download:",
+        )
+
     except FileNotFoundError:
-        st.write("Paper not generated yet.")
+        st.write("Latex not generated yet.")
+
+    try:
+
+        pdffile = ap.project_dir+"/Paper/paper_v4.pdf"
+
+        with open(pdffile, "rb") as pdf_file:
+            PDFbyte = pdf_file.read()
+
+        st.download_button(label="Download pdf",
+                    data=PDFbyte,
+                    file_name="paper.pdf",
+                    mime='application/octet-stream')
+
+        pdf_viewer(pdffile)
+
+    except FileNotFoundError:
+        st.write("Pdf not generated yet.")
 
 def keywords_comp(ap: AstroPilot) -> None:
-    st.header("Keywords")
 
+    st.header("Keywords")
     st.write("Generate keywords from your research text.")
     
     input_text = st.text_area(
