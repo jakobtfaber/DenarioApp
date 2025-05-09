@@ -160,13 +160,13 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        texfile = ap.project_dir+"/Paper/paper_v4.tex"
+        texfile = ap.project_dir+"/paper/paper_v4.tex"
 
         # Ensure that the .tex has been created and we can read it
         with open(texfile, "r") as f:
             f.read()
 
-        zip_data = create_zip_in_memory(ap.project_dir+"/Paper")
+        zip_data = create_zip_in_memory(ap.project_dir+"/paper")
 
         st.download_button(
             label="Download latex files",
@@ -181,7 +181,7 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        pdffile = ap.project_dir+"/Paper/paper_v4.pdf"
+        pdffile = ap.project_dir+"/paper/paper_v4.pdf"
 
         with open(pdffile, "rb") as pdf_file:
             PDFbyte = pdf_file.read()
