@@ -17,7 +17,7 @@ def show_markdown_file(file_path: str, extra_format = False, label: str = "") ->
 
     #For the idea case, need further formatting, workaround for now:
     if extra_format:
-        response = response.replace("\nProject Idea:\n\t","### Project Idea:\n").replace("\t\t","    ")
+        response = response.replace("\nProject Idea:\n\t","### Project Idea\n").replace("\t\t","    ")
 
     st.download_button(
             label="Download "+label,
