@@ -4,3 +4,5 @@ cmbaget_output/
 project_app/
 __pycache__/
 .DS_Store
+
+*.egg-info
