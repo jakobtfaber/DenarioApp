@@ -83,7 +83,7 @@ with st.sidebar.expander("Set API keys"):
 # Main
 #---
 
-st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing the methods, computing the results and writing the paper.")
+st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing methods, computing results and writing papers.")
 
 st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git).")
 
