@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
-from astropilot.llm import LLM
+from astropilot import LLM, models
 
 from utils import show_markdown_file, create_zip_in_memory
 
@@ -48,7 +48,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
         idea_maker_model = st.selectbox(
             "Idea Maker Model",
-            [llm for llm in LLM.keys()],
+            models.keys(),
             index=0,
             key="idea_maker_model"
         )
@@ -56,7 +56,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
         idea_hater_model = st.selectbox(
             "Idea Hater Model",
-            [llm for llm in LLM.keys()],
+            models.keys(),
             index=1,
             key="idea_hater_model"
         )
@@ -65,7 +65,7 @@ def idea_comp(ap: AstroPilot) -> None:
     if press_button:
 
         with st.spinner("Generating research idea...", show_time=True):
-            ap.get_idea(idea_maker_model=idea_maker_model, idea_hater_model=idea_hater_model)
+            ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
 
         st.success("Done!")
 
