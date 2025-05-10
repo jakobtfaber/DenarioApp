@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
+from astropilot.llm import LLM
 
 from utils import show_markdown_file, create_zip_in_memory
 
@@ -29,7 +30,7 @@ def description_comp(ap: AstroPilot) -> None:
 
         ap.set_data_description(data_descr)
 
-    st.markdown("### Current data description:")
+    st.markdown("### Current data description")
 
     try:
         show_markdown_file(ap.project_dir+"/input_files/data_description.md",label="data description")
@@ -47,7 +48,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
         idea_maker_model = st.selectbox(
             "Idea Maker Model",
-            ["gpt-4o", "claude-3-7-sonnet", "gemini-2.5-pro"],
+            [llm for llm in LLM.keys()],
             index=0,
             key="idea_maker_model"
         )
@@ -55,7 +56,7 @@ def idea_comp(ap: AstroPilot) -> None:
         st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
         idea_hater_model = st.selectbox(
             "Idea Hater Model",
-            ["gpt-4o", "claude-3-7-sonnet","gemini-2.5-pro"],
+            [llm for llm in LLM.keys()],
             index=1,
             key="idea_hater_model"
         )
@@ -217,7 +218,7 @@ def keywords_comp(ap: AstroPilot) -> None:
             
             if hasattr(ap.research, 'keywords') and ap.research.keywords:
                 st.success("Keywords generated!")
-                st.write("### Generated Keywords:")
+                st.write("### Generated Keywords")
                 for keyword, url in ap.research.keywords.items():
                     st.markdown(f"- [{keyword}]({url})")
             else:
