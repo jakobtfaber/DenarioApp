@@ -21,10 +21,14 @@ docker build -t astropilot-app .
 To run the app:
 
 ```bash
-docker run -p 8501:8501 --rm -v $(pwd)/project_app:/app/project_app astropilot-app
+docker run -p 8501:8501 --rm \
+    -v $(pwd)/project_app:/app/project_app \
+    -v $(pwd)/data:/app/data \
+    -v $(pwd).env/app/.env \
+    astropilot-app
 ```
 
-That command exposes the default streamlit port `8501`, change it to use a different port. You can mount additional volumes to share data with the docker using the `-v` flag.
+That command exposes the default streamlit port `8501`, change it to use a different port. You can mount additional volumes to share data with the docker using the `-v` flag. The above command shares the `project_app` folder, where the project files are generated, a `data`folder, where the required data would be present, and a `.env` file with the API keys (so no need to parse them manually).
 
 ## TODO
 
@@ -49,5 +53,5 @@ That command exposes the default streamlit port `8501`, change it to use a diffe
 - [x] Modify dockerfile to build with uv for faster build
 - [ ] Generate pdf from latex
 - [ ] Find a way to load .env uploaded without manual reload
-
+- [ ] Allow to upload plots
 

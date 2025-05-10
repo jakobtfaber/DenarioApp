@@ -12,6 +12,7 @@ RUN apt-get update && \
     texlive-fonts-extra \
     texlive-xetex \
     texlive-science \
+    texlive-publishers \
     build-essential \
     git \
     curl \
@@ -53,6 +54,9 @@ RUN uv add astropilot@astropilot-0.1.0-py3-none-any.whl
 
 # This informs Docker that the container will listen on port 5000 at runtime.
 EXPOSE 8501
+
+# Touch a .env so it can be shared as a volume (being a single file instead of a folder requires this)
+RUN touch .env
 
 # Command to run the app
 CMD ["streamlit", "run", "src/app.py"]
