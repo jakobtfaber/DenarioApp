@@ -49,9 +49,9 @@ That command exposes the default streamlit port `8501`, change it to use a diffe
 - [ ] Show files in project
 - [x] Allow to download plots
 - [x] Allow to download tex and pdf
-- [ ] Allow to upload several project files at the same time
+- [x] Allow to upload several project files at the same time
 - [x] Modify dockerfile to build with uv for faster build
 - [ ] Generate pdf from latex
 - [ ] Find a way to load .env uploaded without manual reload
-- [ ] Allow to upload plots
+- [x] Allow to upload plots
 

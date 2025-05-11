@@ -43,31 +43,50 @@ def idea_comp(ap: AstroPilot) -> None:
 
     st.header("Research idea")
     st.write("Generate a research idea provided the data description.")
-    
-    # Add model selection dropdowns
-    col1, col2 = st.columns(2)
-    with col1:
-        st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
-        idea_maker_model = st.selectbox(
-            "Idea Maker Model",
+
+    st.write("Choose between a fast generation process or a more involved one using planning and control through [cmbagent](https://github.com/CMBAgents/cmbagent).")
+
+    fast = st.toggle("Fast generation",value=True,key="fast_toggle_idea")
+
+    if fast:
+
+        st.caption("Choose a LLM model for the fast generation")
+        llm_model = st.selectbox(
+            "LLM Model",
             models.keys(),
             index=0,
-            key="idea_maker_model"
+            key="llm_model_idea"
         )
-    with col2:
-        st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
-        idea_hater_model = st.selectbox(
-            "Idea Hater Model",
-            models.keys(),
-            index=1,
-            key="idea_hater_model"
-        )
+
+    else:
+    
+        # Add model selection dropdowns
+        col1, col2 = st.columns(2)
+        with col1:
+            st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
+            idea_maker_model = st.selectbox(
+                "Idea Maker Model",
+                models.keys(),
+                index=0,
+                key="idea_maker_model"
+            )
+        with col2:
+            st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
+            idea_hater_model = st.selectbox(
+                "Idea Hater Model",
+                models.keys(),
+                index=1,
+                key="idea_hater_model"
+            )
     
     press_button = st.button("Generate", type="primary",key="get_idea")
     if press_button:
 
         with st.spinner("Generating research idea...", show_time=True):
-            ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
+            if fast:
+                ap.get_idea_fast(llm=llm_model)
+            else:
+                ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
 
         st.success("Done!")
 
@@ -87,11 +106,28 @@ def method_comp(ap: AstroPilot) -> None:
     st.header("Methods")
     st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
 
+    st.write("Choose between a fast generation process or a more involved one using planning and control through [cmbagent](https://github.com/CMBAgents/cmbagent).")
+
+    fast = st.toggle("Fast generation",value=True,key="fast_toggle_method")
+
+    if fast:
+
+        st.caption("Choose a LLM model for the fast generation")
+        llm_model = st.selectbox(
+            "LLM Model",
+            models.keys(),
+            index=0,
+            key="llm_model_method"
+        )
+
     press_button = st.button("Generate", type="primary",key="get_method")
     if press_button:
 
         with st.spinner("Generating methods...", show_time=True):
-            ap.get_method()
+            if fast:
+                ap.get_method_fast(llm=llm_model)
+            else:
+                ap.get_method()
 
         st.success("Done!")
 
@@ -131,10 +167,11 @@ def results_comp(ap: AstroPilot) -> None:
                 plots.append(Image.open(file))
         ap.set_plots(plots)
 
-    try:
-        plots = list(Path(ap.project_dir+"/input_files/plots").glob("*"))
+    plots = list(Path(ap.project_dir+"/input_files/plots").glob("*"))
 
-        num_plots = len(list(plots))
+    num_plots = len(list(plots))
+
+    if num_plots>0:
         plots_cols = st.columns(num_plots)
 
         for i, plot in enumerate(plots):
@@ -151,7 +188,7 @@ def results_comp(ap: AstroPilot) -> None:
             icon=":material/download:",
         )
 
-    except FileNotFoundError:
+    else:
         st.write("Plots not generated or uploaded.")
 
     try:
