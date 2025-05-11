@@ -1,3 +1,5 @@
+from pathlib import Path
+from PIL import Image
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
@@ -35,7 +37,7 @@ def description_comp(ap: AstroPilot) -> None:
     try:
         show_markdown_file(ap.project_dir+"/input_files/data_description.md",label="data description")
     except FileNotFoundError:
-        st.write("Data description not generated yet.")
+        st.write("Data description not set.")
 
 def idea_comp(ap: AstroPilot) -> None:
 
@@ -78,7 +80,7 @@ def idea_comp(ap: AstroPilot) -> None:
     try:
         show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
     except FileNotFoundError:
-        st.write("Idea not generated yet.")
+        st.write("Idea not generated or uploaded.")
 
 def method_comp(ap: AstroPilot) -> None:
 
@@ -102,7 +104,7 @@ def method_comp(ap: AstroPilot) -> None:
     try:
         show_markdown_file(ap.project_dir+"/input_files/methods.md",label="methods")
     except FileNotFoundError:
-        st.write("Methods not generated yet.")
+        st.write("Methods not generated or uploaded.")
         
 def results_comp(ap: AstroPilot) -> None:
 
@@ -117,13 +119,27 @@ def results_comp(ap: AstroPilot) -> None:
 
         st.success("Done!")
 
-    uploaded_file = st.file_uploader("Choose a file with the results of the research", accept_multiple_files=False)
+    uploaded_files = st.file_uploader("Upload markdown file and/or plots from the results of the research", accept_multiple_files=True)
 
-    if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        ap.set_results(content)
+    if uploaded_files:
+        plots = []
+        for file in uploaded_files:
+            if file.name.endswith(".md"):
+                content = file.read().decode("utf-8")
+                ap.set_results(content)
+            else:
+                plots.append(Image.open(file))
+        ap.set_plots(plots)
 
     try:
+        plots = list(Path(ap.project_dir+"/input_files/plots").glob("*"))
+
+        num_plots = len(list(plots))
+        plots_cols = st.columns(num_plots)
+
+        for i, plot in enumerate(plots):
+            with plots_cols[i]:
+                st.image(plot, caption=plot.name, width=500)
 
         zip_data = create_zip_in_memory(ap.project_dir+"/input_files/plots")
 
@@ -135,10 +151,15 @@ def results_comp(ap: AstroPilot) -> None:
             icon=":material/download:",
         )
 
+    except FileNotFoundError:
+        st.write("Plots not generated or uploaded.")
+
+    try:
+
         show_markdown_file(ap.project_dir+"/input_files/results.md",label="results")
 
     except FileNotFoundError:
-        st.write("Results not generated yet.")
+        st.write("Results not generated or uploaded.")
 
 def paper_comp(ap: AstroPilot) -> None:
 
