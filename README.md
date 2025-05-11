@@ -30,6 +30,8 @@ docker run -p 8501:8501 --rm \
 
 That command exposes the default streamlit port `8501`, change it to use a different port. You can mount additional volumes to share data with the docker using the `-v` flag. The above command shares the `project_app` folder, where the project files are generated, a `data`folder, where the required data would be present, and a `.env` file with the API keys (so no need to parse them manually).
 
+You can also use [docker compose](https://docs.docker.com/compose/), you can just run `docker compose up` to build the iamge and run the container.
+
 ## TODO
 
 - [x] Prerender markdown files if they exist

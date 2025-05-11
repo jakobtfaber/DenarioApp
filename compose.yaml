@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8501:8501
+    volumes:
+      - ./project_app:/app/project_app
+      - ./data:/app/data
+      - ./.env:/app/.env
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
