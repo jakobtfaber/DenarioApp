@@ -1,4 +1,4 @@
-cmbaget_output/
+cmbagent_output/
 .cache/
 *.whl
 project_app/
