@@ -60,6 +60,12 @@ def idea_comp(ap: AstroPilot) -> None:
 
     else:
     
+        model_keys = list(models.keys())
+
+        # Get index of desired default models
+        default_idea_maker_index = model_keys.index("gpt-4o")
+        default_idea_hater_index = model_keys.index("claude-3.7-sonnet")
+
         # Add model selection dropdowns
         col1, col2 = st.columns(2)
         with col1:
@@ -67,7 +73,7 @@ def idea_comp(ap: AstroPilot) -> None:
             idea_maker_model = st.selectbox(
                 "Idea Maker Model",
                 models.keys(),
-                index=4,
+                index=default_idea_maker_index,
                 key="idea_maker_model"
             )
         with col2:
@@ -75,7 +81,7 @@ def idea_comp(ap: AstroPilot) -> None:
             idea_hater_model = st.selectbox(
                 "Idea Hater Model",
                 models.keys(),
-                index=5,
+                index=default_idea_hater_index,
                 key="idea_hater_model"
             )
     
