@@ -209,20 +209,29 @@ def paper_comp(ap: AstroPilot) -> None:
     st.header("Article")
     st.write("Write the article using the computed results of the research.")
 
-    st.caption("Choose a LLM model for the paper generation")
-    llm_model = st.selectbox(
-        "LLM Model",
-        models.keys(),
-        index=0,
-        key="llm_model_paper"
-    )
+    with st.expander("Options for the paper writing agents"):
 
-    selected_journal = st.selectbox(
-        "Choose the journal for the latex style:",
-        [j.value for j in Journal],
-        index=0, key="journal_select")
-    
-    citations = st.toggle("Add citations",value=True,key="toggle_citations")
+        st.caption("Choose a LLM model for the paper generation")
+        llm_model = st.selectbox(
+            "LLM Model",
+            models.keys(),
+            index=0,
+            key="llm_model_paper"
+        )
+
+        selected_journal = st.selectbox(
+            "Choose the journal for the latex style:",
+            [j.value for j in Journal],
+            index=0, key="journal_select")
+        
+        citations = st.toggle("Add citations",value=True,key="toggle_citations")
+
+        writer = st.text_input(
+            "Describe the type of researcher e.g. cosmologist, biologist... Default is 'scientist'.",
+            placeholder="scientist",
+            key="writer_type",
+            value="scientist",
+        )
 
     press_button = st.button("Generate", type="primary",key="get_paper")
     if press_button:
@@ -230,6 +239,7 @@ def paper_comp(ap: AstroPilot) -> None:
         with st.spinner("Writing the paper...", show_time=True):
             ap.get_paper(journal=selected_journal,
                          llm=llm_model,
+                         writer=writer,
                          add_citations=citations)
 
         st.success("Done!")
