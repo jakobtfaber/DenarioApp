@@ -1,10 +1,24 @@
 # AstroPilotApp
 
-GUI for [AstroPilot](https://github.com/AstroPilot-AI/AstroPilot.git) powered by [streamlit](https://streamlit.io).
+GUI for [AstroPilot](https://github.com/AstroPilot-AI/AstroPilot.git), powered by [streamlit](https://streamlit.io).
 
 ## Run locally
 
-Run with:
+Install the GUI from source following one of the following steps.
+
+1. Install with pip
+
+    ```bash
+    pip install -e .
+    ```
+
+2. Install with [uv](https://docs.astral.sh/uv/)
+
+    ```bash
+    uv sync
+    ```
+
+Run the webapp with:
 
 ```bash
 streamlit run src/app.py
@@ -30,7 +44,13 @@ docker run -p 8501:8501 --rm \
 
 That command exposes the default streamlit port `8501`, change it to use a different port. You can mount additional volumes to share data with the docker using the `-v` flag. The above command shares the `project_app` folder, where the project files are generated, a `data`folder, where the required data would be present, and a `.env` file with the API keys (so no need to parse them manually).
 
-You can also use [docker compose](https://docs.docker.com/compose/), you can just run `docker compose up` to build the iamge and run the container.
+You can also use [docker compose](https://docs.docker.com/compose/), you can just run
+
+```bash
+docker compose up --watch
+```
+
+to build the iamge and run the container.
 
 ## TODO
 
@@ -53,7 +73,6 @@ You can also use [docker compose](https://docs.docker.com/compose/), you can jus
 - [x] Allow to download tex and pdf
 - [x] Allow to upload several project files at the same time
 - [x] Modify dockerfile to build with uv for faster build
-- [ ] Generate pdf from latex
-- [ ] Find a way to load .env uploaded without manual reload
+- [ ] Generate pdf from latex for all journals
 - [x] Allow to upload plots
 

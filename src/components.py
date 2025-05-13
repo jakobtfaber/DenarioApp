@@ -67,7 +67,7 @@ def idea_comp(ap: AstroPilot) -> None:
             idea_maker_model = st.selectbox(
                 "Idea Maker Model",
                 models.keys(),
-                index=0,
+                index=4,
                 key="idea_maker_model"
             )
         with col2:
@@ -75,7 +75,7 @@ def idea_comp(ap: AstroPilot) -> None:
             idea_hater_model = st.selectbox(
                 "Idea Hater Model",
                 models.keys(),
-                index=1,
+                index=5,
                 key="idea_hater_model"
             )
     
@@ -203,16 +203,28 @@ def paper_comp(ap: AstroPilot) -> None:
     st.header("Article")
     st.write("Write the article using the computed results of the research.")
 
+    st.caption("Choose a LLM model for the paper generation")
+    llm_model = st.selectbox(
+        "LLM Model",
+        models.keys(),
+        index=0,
+        key="llm_model_paper"
+    )
+
     selected_journal = st.selectbox(
         "Choose the journal for the latex style:",
         [j.value for j in Journal],
         index=0, key="journal_select")
+    
+    citations = st.toggle("Add citations",value=True,key="toggle_citations")
 
     press_button = st.button("Generate", type="primary",key="get_paper")
     if press_button:
 
         with st.spinner("Writing the paper...", show_time=True):
-            ap.get_paper(journal=selected_journal)
+            ap.get_paper(journal=selected_journal,
+                         llm=llm_model,
+                         add_citations=citations)
 
         st.success("Done!")
         st.balloons()
