@@ -153,11 +153,38 @@ def results_comp(ap: AstroPilot) -> None:
     st.header("Results")
     st.write("Compute the results, given the methods, idea and data description.")
 
+
+    model_keys = list(models.keys())
+
+    # Get index of desired default models
+    default_researcher_index = model_keys.index("o3-mini")
+    default_engineer_index = model_keys.index("claude-3.7-sonnet")
+
+    # Add model selection dropdowns
+    col1, col2 = st.columns(2)
+    with col1:
+        st.caption("Engineer: Generates the code to compute the results")
+        engineer_model = st.selectbox(
+            "Engineer Model",
+            models.keys(),
+            index=default_engineer_index,
+            key="engineer_model"
+        )
+    with col2:
+        st.caption("Researcher: processes the results and writes the results report")
+        researcher_model = st.selectbox(
+            "Researcher Model",
+            models.keys(),
+            index=default_researcher_index,
+            key="researcher_model"
+        )
+
+
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
         with st.spinner("Computing results...", show_time=True):
-            ap.get_results()
+            ap.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
 
         st.success("Done!")
 
