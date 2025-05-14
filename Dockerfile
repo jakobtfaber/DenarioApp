@@ -2,7 +2,7 @@
 # Use a Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
-# Install system dependencies including LaTeX
+# Install system dependencies including LaTeX and some fonts for xelatex
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     texlive-latex-base \
@@ -13,6 +13,13 @@ RUN apt-get update && \
     texlive-xetex \
     texlive-science \
     texlive-publishers \
+    texlive-plain-generic \
+    fonts-freefont-ttf \
+    fonts-dejavu \
+    fonts-noto \
+    fonts-liberation \
+    fonts-inconsolata \
+    fonts-texgyre \
     build-essential \
     git \
     curl \
