@@ -1,6 +1,6 @@
+import os
 import streamlit as st
 from astropilot import AstroPilot
-import os
 
 from constants import PROJECT_DIR, LLMs, llms_keys
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
@@ -26,6 +26,23 @@ st.set_page_config(
 st.session_state["LLM_API_KEYS"] = {}
 
 st.title('ResearchPilot')
+
+# Inject custom CSS
+st.markdown("""
+    <style>
+    .log-box {
+        background-color: #111827;
+        color: #d1d5db;
+        font-family: monospace;
+        padding: 1em;
+        border-radius: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #4b5563;
+        white-space: pre-wrap;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 #---
 # Sidebar UI

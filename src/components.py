@@ -3,9 +3,9 @@ from PIL import Image
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from astropilot import AstroPilot, Journal
-from astropilot import LLM, models
+from astropilot import models
 
-from utils import show_markdown_file, create_zip_in_memory
+from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
 
 #--- 
 # Components
@@ -48,19 +48,21 @@ def idea_comp(ap: AstroPilot) -> None:
 
     fast = st.toggle("Fast generation",value=True,key="fast_toggle_idea")
 
+    model_keys = list(models.keys())
+
     if fast:
+
+        default_fast_idea_index = model_keys.index("gemini-2.0-flash")
 
         st.caption("Choose a LLM model for the fast generation")
         llm_model = st.selectbox(
             "LLM Model",
-            models.keys(),
-            index=0,
+            model_keys,
+            index=default_fast_idea_index,
             key="llm_model_idea"
         )
 
     else:
-    
-        model_keys = list(models.keys())
 
         # Get index of desired default models
         default_idea_maker_index = model_keys.index("gpt-4o")
@@ -72,7 +74,7 @@ def idea_comp(ap: AstroPilot) -> None:
             st.caption("Idea Maker: Generates and selects the best research ideas based on the data description")
             idea_maker_model = st.selectbox(
                 "Idea Maker Model",
-                models.keys(),
+                model_keys,
                 index=default_idea_maker_index,
                 key="idea_maker_model"
             )
@@ -80,7 +82,7 @@ def idea_comp(ap: AstroPilot) -> None:
             st.caption("Idea Hater: Critiques ideas and proposes recommendations for improvement")
             idea_hater_model = st.selectbox(
                 "Idea Hater Model",
-                models.keys(),
+                model_keys,
                 index=default_idea_hater_index,
                 key="idea_hater_model"
             )
@@ -89,10 +91,16 @@ def idea_comp(ap: AstroPilot) -> None:
     if press_button:
 
         with st.spinner("Generating research idea...", show_time=True):
-            if fast:
-                ap.get_idea_fast(llm=llm_model)
-            else:
-                ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
+
+            log_box = st.empty()
+
+            # Redirect console output to app
+            with stream_to_streamlit(log_box):
+
+                if fast:
+                    ap.get_idea_fast(llm=llm_model)
+                else:
+                    ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
 
         st.success("Done!")
 
@@ -116,13 +124,17 @@ def method_comp(ap: AstroPilot) -> None:
 
     fast = st.toggle("Fast generation",value=True,key="fast_toggle_method")
 
+    model_keys = list(models.keys())
+
+    default_fast_method_index = model_keys.index("gemini-2.0-flash")
+
     if fast:
 
         st.caption("Choose a LLM model for the fast generation")
         llm_model = st.selectbox(
             "LLM Model",
-            models.keys(),
-            index=0,
+            model_keys,
+            index=default_fast_method_index,
             key="llm_model_method"
         )
 
@@ -130,10 +142,16 @@ def method_comp(ap: AstroPilot) -> None:
     if press_button:
 
         with st.spinner("Generating methods...", show_time=True):
-            if fast:
-                ap.get_method_fast(llm=llm_model)
-            else:
-                ap.get_method()
+
+            log_box = st.empty()
+
+            # Redirect console output to app
+            with stream_to_streamlit(log_box):
+
+                if fast:
+                    ap.get_method_fast(llm=llm_model)
+                else:
+                    ap.get_method()
 
         st.success("Done!")
 
@@ -153,7 +171,6 @@ def results_comp(ap: AstroPilot) -> None:
     st.header("Results")
     st.write("Compute the results, given the methods, idea and data description.")
 
-
     model_keys = list(models.keys())
 
     # Get index of desired default models
@@ -166,7 +183,7 @@ def results_comp(ap: AstroPilot) -> None:
         st.caption("Engineer: Generates the code to compute the results")
         engineer_model = st.selectbox(
             "Engineer Model",
-            models.keys(),
+            model_keys,
             index=default_engineer_index,
             key="engineer_model"
         )
@@ -174,7 +191,7 @@ def results_comp(ap: AstroPilot) -> None:
         st.caption("Researcher: processes the results and writes the results report")
         researcher_model = st.selectbox(
             "Researcher Model",
-            models.keys(),
+            model_keys,
             index=default_researcher_index,
             key="researcher_model"
         )
@@ -184,7 +201,13 @@ def results_comp(ap: AstroPilot) -> None:
     if press_button:
 
         with st.spinner("Computing results...", show_time=True):
-            ap.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
+
+            log_box = st.empty()
+
+            # Redirect console output to app
+            with stream_to_streamlit(log_box):
+
+                ap.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
 
         st.success("Done!")
 
@@ -264,10 +287,16 @@ def paper_comp(ap: AstroPilot) -> None:
     if press_button:
 
         with st.spinner("Writing the paper...", show_time=True):
-            ap.get_paper(journal=selected_journal,
-                         llm=llm_model,
-                         writer=writer,
-                         add_citations=citations)
+
+            log_box = st.empty()
+
+            # Redirect console output to app
+            with stream_to_streamlit(log_box):
+                
+                ap.get_paper(journal=selected_journal,
+                            llm=llm_model,
+                            writer=writer,
+                            add_citations=citations)
 
         st.success("Done!")
         st.balloons()

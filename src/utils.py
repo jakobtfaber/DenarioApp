@@ -2,6 +2,9 @@ import os
 import io
 import zipfile
 import re
+import sys
+import io
+from contextlib import contextmanager
 import streamlit as st
 
 from constants import PROJECT_DIR
@@ -58,3 +61,29 @@ def create_zip_in_memory(folder_path: str):
     zip_buffer.seek(0)
 
     return zip_buffer
+
+class StreamToBuffer(io.StringIO):
+    def __init__(self, update_callback):
+        super().__init__()
+        self.update_callback = update_callback
+
+    def write(self, s):
+        super().write(s)
+        self.seek(0)
+        self.update_callback(self.read())
+        self.seek(0, io.SEEK_END)  # Move to end again
+
+@contextmanager
+def stream_to_streamlit(container):
+
+    buffer = StreamToBuffer(update_callback=lambda text: container.markdown(
+        f"""<div class="log-box">{text.replace('\n', '<br>')}</div>""",
+        unsafe_allow_html=True
+    ))
+
+    old_stdout = sys.stdout
+    sys.stdout = buffer
+    try:
+        yield
+    finally:
+        sys.stdout = old_stdout
