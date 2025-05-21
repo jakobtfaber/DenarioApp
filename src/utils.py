@@ -3,6 +3,8 @@ import io
 import zipfile
 import re
 import sys
+import uuid
+import shutil
 from contextlib import contextmanager
 import streamlit as st
 
@@ -60,6 +62,17 @@ def create_zip_in_memory(folder_path: str):
     zip_buffer.seek(0)
 
     return zip_buffer
+
+def get_project_dir():
+
+    if "project_dir" not in st.session_state:
+        
+        temp_dir = f"project_{uuid.uuid4().hex}"
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        st.session_state.project_dir = temp_dir
+
+    return st.session_state.project_dir
 
 class StreamToBuffer(io.StringIO):
     def __init__(self, update_callback):

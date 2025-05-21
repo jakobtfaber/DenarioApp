@@ -4,13 +4,20 @@ from astropilot import AstroPilot
 
 from constants import PROJECT_DIR, LLMs, llms_keys
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
-from utils import extract_api_keys
+from utils import extract_api_keys, get_project_dir
 
 #---
 # Initialize session
 #--- 
 
-ap = AstroPilot(project_dir=PROJECT_DIR, clear_project_dir=False)
+deploy = True
+
+if deploy:
+    project_dir = get_project_dir()
+else:
+    project_dir = PROJECT_DIR
+
+ap = AstroPilot(project_dir=project_dir, clear_project_dir=False)
 
 astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
