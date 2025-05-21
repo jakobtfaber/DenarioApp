@@ -27,7 +27,6 @@ st.session_state["LLM_API_KEYS"] = {}
 
 st.title('ResearchPilot')
 
-# Inject custom CSS
 st.markdown("""
     <style>
     .log-box {
@@ -40,9 +39,13 @@ st.markdown("""
         overflow-y: auto;
         border: 1px solid #4b5563;
         white-space: pre-wrap;
+        resize: vertical;
+        min-height: 100px;
+        max-height: 700px;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 #---
 # Sidebar UI
