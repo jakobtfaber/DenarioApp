@@ -31,52 +31,54 @@ st.title('ResearchPilot')
 # Sidebar UI
 #---
 
-# st.sidebar.image(astropilotimg)
+with st.sidebar:
 
-st.sidebar.header("API keys")
-st.sidebar.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
+    # st.image(astropilotimg)
 
-with st.sidebar.expander("Set API keys"):
+    st.header("API keys")
+    st.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
 
-    # If API key doesn't exist, show the input field
-    for llm in LLMs:
-        api_key = st.text_input(
-            f"{llm} API key:",
-            type="password",
-            key=f"{llm}_api_key_input"
-        )
-        
-        # If the user enters a key, save it and rerun to refresh the interface
-        if api_key:
-            st.session_state["LLM_API_KEYS"][llm] = api_key
+    with st.expander("Set API keys"):
 
-            os.environ[llms_keys[llm]] = api_key
+        # If API key doesn't exist, show the input field
+        for llm in LLMs:
+            api_key = st.text_input(
+                f"{llm} API key:",
+                type="password",
+                key=f"{llm}_api_key_input"
+            )
             
-        # Check both session state and environment variables
-        env_var_name = f"{llm.upper()}_API_KEY"
-        has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
-        
-        # Display status after the key is saved
-        if has_key:
-            st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
-        else:
-            st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
+            # If the user enters a key, save it and rerun to refresh the interface
+            if api_key:
+                st.session_state["LLM_API_KEYS"][llm] = api_key
 
-    st.markdown("""Or just upload a .env file with the following keys and reload the page:
-                ```
-                OPENAI_API_KEY="..."
-                ANTHROPIC_API_KEY="..."
-                GEMINI_API_KEY="..."
-                PERPLEXITY_API_KEY="..."
-                ```
-                """)
-    uploaded_dotenv = st.file_uploader("Upload the .env file", accept_multiple_files=False)
+                os.environ[llms_keys[llm]] = api_key
+                
+            # Check both session state and environment variables
+            env_var_name = f"{llm.upper()}_API_KEY"
+            has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
+            
+            # Display status after the key is saved
+            if has_key:
+                st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
+            else:
+                st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
 
-    if uploaded_dotenv:
-        keys = extract_api_keys(uploaded_dotenv)
+        st.markdown("""Or just upload a .env file with the following keys and reload the page:
+                    ```
+                    OPENAI_API_KEY="..."
+                    ANTHROPIC_API_KEY="..."
+                    GEMINI_API_KEY="..."
+                    PERPLEXITY_API_KEY="..."
+                    ```
+                    """)
+        uploaded_dotenv = st.file_uploader("Upload the .env file", accept_multiple_files=False)
 
-        for key, value in keys.items():
-            os.environ[key] = value
+        if uploaded_dotenv:
+            keys = extract_api_keys(uploaded_dotenv)
+
+            for key, value in keys.items():
+                os.environ[key] = value
 
 #---
 # Main
