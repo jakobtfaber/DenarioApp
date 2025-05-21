@@ -196,7 +196,6 @@ def results_comp(ap: AstroPilot) -> None:
             key="researcher_model"
         )
 
-
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
@@ -232,13 +231,13 @@ def results_comp(ap: AstroPilot) -> None:
 
         for i, plot in enumerate(plots):
             with plots_cols[i]:
-                st.image(plot, caption=plot.name, width=500)
+                st.image(plot, caption=plot.name)
 
-        zip_data = create_zip_in_memory(ap.project_dir+"/input_files/plots")
+        plots_zip = create_zip_in_memory(ap.project_dir+"/input_files/plots")
 
         st.download_button(
             label="Download plots",
-            data=zip_data,
+            data=plots_zip,
             file_name="plots.zip",
             mime="application/zip",
             icon=":material/download:",
@@ -249,7 +248,17 @@ def results_comp(ap: AstroPilot) -> None:
 
     try:
 
-        show_markdown_file(ap.project_dir+"/input_files/results.md",label="results")
+        codes_zip = create_zip_in_memory(ap.project_dir+"/experiment_generation_output")
+
+        st.download_button(
+            label="Download codes",
+            data=codes_zip,
+            file_name="codes.zip",
+            mime="application/zip",
+            icon=":material/download:",
+        )
+
+        show_markdown_file(ap.project_dir+"/input_files/results.md",label="results summary")
 
     except FileNotFoundError:
         st.write("Results not generated or uploaded.")
@@ -292,7 +301,7 @@ def paper_comp(ap: AstroPilot) -> None:
 
             # Redirect console output to app
             with stream_to_streamlit(log_box):
-                
+
                 ap.get_paper(journal=selected_journal,
                             llm=llm_model,
                             writer=writer,
@@ -309,11 +318,11 @@ def paper_comp(ap: AstroPilot) -> None:
         with open(texfile, "r") as f:
             f.read()
 
-        zip_data = create_zip_in_memory(ap.project_dir+"/paper")
+        paper_zip = create_zip_in_memory(ap.project_dir+"/paper")
 
         st.download_button(
             label="Download latex files",
-            data=zip_data,
+            data=paper_zip,
             file_name="paper.zip",
             mime="application/zip",
             icon=":material/download:",
@@ -332,7 +341,8 @@ def paper_comp(ap: AstroPilot) -> None:
         st.download_button(label="Download pdf",
                     data=PDFbyte,
                     file_name="paper.pdf",
-                    mime='application/octet-stream')
+                    mime='application/octet-stream',
+                    icon=":material/download:")
 
         pdf_viewer(pdffile)
 

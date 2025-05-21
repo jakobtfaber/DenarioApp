@@ -67,12 +67,14 @@ to build the iamge and run the container.
 - [ ] Include API validators
 - [x] Download .md files
 - [x] Upload .env directly
-- [ ] Print console log in GUI
+- [x] Print console log in GUI
 - [ ] Show files in project
 - [x] Allow to download plots
 - [x] Allow to download tex and pdf
 - [x] Allow to upload several project files at the same time
 - [x] Modify dockerfile to build with uv for faster build
-- [ ] Generate pdf from latex for all journals
+- [x] Generate pdf from latex for all journals
 - [x] Allow to upload plots
+- [ ] Allow for different users
+- [x] Allow to download generated code
 
