@@ -1,6 +1,8 @@
-# Dockerfile example from https://github.com/astral-sh/uv-docker-example/blob/main/Dockerfile
-# Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+# Use an official Python image as base
+FROM python:3.13-slim
+
+# Set environment variables to avoid interactive prompts during package installs
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies including LaTeX and some fonts for xelatex
 RUN apt-get update && \
@@ -27,37 +29,29 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Set up a new user named "user" with user ID 1000
+RUN useradd -m -u 1000 user
+
+# Switch to the "user" user
+USER user
+
+# Set home to the user's home directory
+ENV HOME=/home/user \
+	PATH=/home/user/.local/bin:$PATH
+
 # Install the project into `/app`
-WORKDIR /app
-
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
-
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
-
-# Install the project's dependencies using the lockfile and settings
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-dev
+WORKDIR $HOME/app
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 # Copy all the app code to the docker
-COPY . .
+COPY --chown=user . $HOME/app
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+# Install Astropilot
+RUN pip install astropilot-0.1.0-py3-none-any.whl
 
-# Place executables in the environment at the front of the path
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Reset the entrypoint, don't invoke `uv`
-ENTRYPOINT []
-
-# Install astropilot from local wheel
-RUN uv add astropilot@astropilot-0.1.0-py3-none-any.whl
+# Install
+RUN pip install .
 
 # This informs Docker that the container will listen on port 5000 at runtime.
 EXPOSE 8501
@@ -66,4 +60,6 @@ EXPOSE 8501
 RUN touch .env
 
 # Command to run the app
-CMD ["streamlit", "run", "src/app.py"]
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+CMD ["streamlit", "run", "src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
