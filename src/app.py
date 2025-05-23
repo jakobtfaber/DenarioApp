@@ -4,7 +4,7 @@ from astropilot import AstroPilot
 
 from constants import PROJECT_DIR, LLMs
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
-from utils import extract_api_keys, get_project_dir, set_api_keys
+from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory
 
 #---
 # Initialize session
@@ -105,6 +105,18 @@ with st.sidebar:
             for key, value in keys.items():
                 st.session_state["LLM_API_KEYS"][key] = value
                 ap.keys[key] = value
+
+    st.header("Download project")
+
+    project_zip = create_zip_in_memory(ap.project_dir)
+
+    st.download_button(
+        label="Download all project files",
+        data=project_zip,
+        file_name="project.zip",
+        mime="application/zip",
+        icon=":material/download:",
+    )
 
 #---
 # Main
