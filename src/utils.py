@@ -4,9 +4,9 @@ import zipfile
 import re
 import sys
 import uuid
-import shutil
 from contextlib import contextmanager
 import streamlit as st
+from astropilot import KeyManager
 
 from constants import PROJECT_DIR
 
@@ -43,7 +43,10 @@ def extract_api_keys(uploaded_file):
         match = pattern.match(line)
         if match:
             key_name, key_value = match.groups()
-            keys[key_name] = key_value
+            if key_name in KeyManager.model_fields.keys():
+                keys[key_name] = key_value
+            if "GOOGLE" in key_name:
+                keys["GEMINI"] = key_value
 
     return keys
 

@@ -10,7 +10,7 @@ from utils import extract_api_keys, get_project_dir
 # Initialize session
 #--- 
 
-deploy = True
+deploy = False
 
 if deploy:
     project_dir = get_project_dir()
@@ -78,12 +78,11 @@ with st.sidebar:
             # If the user enters a key, save it and rerun to refresh the interface
             if api_key:
                 st.session_state["LLM_API_KEYS"][llm] = api_key
-
-                os.environ[llms_keys[llm]] = api_key
+                ap.keys[llm] = api_key
                 
             # Check both session state and environment variables
             env_var_name = f"{llm.upper()}_API_KEY"
-            has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
+            has_key = llm in st.session_state["LLM_API_KEYS"]
             
             # Display status after the key is saved
             if has_key:
@@ -105,7 +104,8 @@ with st.sidebar:
             keys = extract_api_keys(uploaded_dotenv)
 
             for key, value in keys.items():
-                os.environ[key] = value
+                st.session_state["LLM_API_KEYS"][key] = value
+                ap.keys[key.replace("_API_KEY","")] = value
 
 #---
 # Main
