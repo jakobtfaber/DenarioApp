@@ -4,11 +4,11 @@ import zipfile
 import re
 import sys
 import uuid
-import shutil
 from contextlib import contextmanager
 import streamlit as st
+from astropilot import KeyManager
 
-from constants import PROJECT_DIR
+from constants import PROJECT_DIR, LLMs
 
 #--- 
 # Utils
@@ -43,9 +43,23 @@ def extract_api_keys(uploaded_file):
         match = pattern.match(line)
         if match:
             key_name, key_value = match.groups()
-            keys[key_name] = key_value
+            key_name = key_name.replace("_API_KEY","")
+            if key_name in LLMs:
+                keys[key_name] = key_value
+            if "GOOGLE" in key_name:
+                keys["GEMINI"] = key_value
 
     return keys
+
+def set_api_keys(key_manager: KeyManager, api_key: str, llm: str):
+    if llm=="GEMINI":
+        key_manager.GEMINI = api_key
+    elif llm=="OPENAI":
+        key_manager.OPENAI = api_key
+    elif llm=="ANTHROPIC":
+        key_manager.ANTHROPIC = api_key
+    elif llm=="PERPLEXITY":
+        key_manager.PERPLEXITY = api_key
 
 def create_zip_in_memory(folder_path: str):
     """Create a zip in memory"""

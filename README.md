@@ -77,4 +77,6 @@ to build the iamge and run the container.
 - [x] Allow to upload plots
 - [ ] Allow for different users
 - [x] Allow to download generated code
-
+- [x] Add download project button
+- [ ] Show API keys active if .env is uploaded
+- [ ] Add generate button if it fails instead of reloading page

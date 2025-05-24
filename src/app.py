@@ -2,15 +2,15 @@ import os
 import streamlit as st
 from astropilot import AstroPilot
 
-from constants import PROJECT_DIR, LLMs, llms_keys
+from constants import PROJECT_DIR, LLMs
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
-from utils import extract_api_keys, get_project_dir
+from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory
 
 #---
 # Initialize session
 #--- 
 
-deploy = True
+deploy = False
 
 if deploy:
     project_dir = get_project_dir()
@@ -78,12 +78,10 @@ with st.sidebar:
             # If the user enters a key, save it and rerun to refresh the interface
             if api_key:
                 st.session_state["LLM_API_KEYS"][llm] = api_key
-
-                os.environ[llms_keys[llm]] = api_key
-                
-            # Check both session state and environment variables
-            env_var_name = f"{llm.upper()}_API_KEY"
-            has_key = (llm in st.session_state["LLM_API_KEYS"]) or (env_var_name in os.environ)
+                set_api_keys(ap.keys, api_key, llm)
+            
+            # Check session state
+            has_key = st.session_state["LLM_API_KEYS"].get(llm)
             
             # Display status after the key is saved
             if has_key:
@@ -105,7 +103,20 @@ with st.sidebar:
             keys = extract_api_keys(uploaded_dotenv)
 
             for key, value in keys.items():
-                os.environ[key] = value
+                st.session_state["LLM_API_KEYS"][key] = value
+                ap.keys[key] = value
+
+    st.header("Download project")
+
+    project_zip = create_zip_in_memory(ap.project_dir)
+
+    st.download_button(
+        label="Download all project files",
+        data=project_zip,
+        file_name="project.zip",
+        mime="application/zip",
+        icon=":material/download:",
+    )
 
 #---
 # Main

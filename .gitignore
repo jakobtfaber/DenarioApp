@@ -1,7 +1,6 @@
 cmbagent_output/
 .cache/
 *.whl
-project_app/
 __pycache__/
 .DS_Store
 
@@ -9,4 +8,4 @@ __pycache__/
 
 .env
 data/
-project_app*
+project_*
