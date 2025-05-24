@@ -297,15 +297,15 @@ def paper_comp(ap: AstroPilot) -> None:
 
         with st.spinner("Writing the paper...", show_time=True):
 
-            log_box = st.empty()
+            # log_box = st.empty()
 
             # Redirect console output to app
-            with stream_to_streamlit(log_box):
+            # with stream_to_streamlit(log_box):
 
-                ap.get_paper(journal=selected_journal,
-                            llm=llm_model,
-                            writer=writer,
-                            add_citations=citations)
+            ap.get_paper(journal=selected_journal,
+                        llm=llm_model,
+                        writer=writer,
+                        add_citations=citations)
 
         st.success("Done!")
         st.balloons()
