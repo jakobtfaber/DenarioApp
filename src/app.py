@@ -1,4 +1,4 @@
-import os
+import argparse
 import streamlit as st
 from astropilot import AstroPilot
 
@@ -10,7 +10,9 @@ from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in
 # Initialize session
 #--- 
 
-deploy = False
+parser = argparse.ArgumentParser()
+parser.add_argument('--deploy',action='store_true',help='Flag to enable special settings for deployment in Huggin Face Spaces')
+deploy = parser.parse_args().deploy
 
 if deploy:
     project_dir = get_project_dir()
