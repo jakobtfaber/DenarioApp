@@ -2,8 +2,8 @@ from pathlib import Path
 from PIL import Image
 import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
-from astropilot import AstroPilot, Journal
-from astropilot import models
+from denario import Denario, Journal
+from denario import models
 
 from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
 
@@ -11,7 +11,7 @@ from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
 # Components
 #---
 
-def description_comp(ap: AstroPilot) -> None:
+def description_comp(den: Denario) -> None:
 
     st.header("Data description")
 
@@ -26,20 +26,20 @@ def description_comp(ap: AstroPilot) -> None:
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
-        ap.set_data_description(content)   
+        den.set_data_description(content)   
 
     if data_descr:
 
-        ap.set_data_description(data_descr)
+        den.set_data_description(data_descr)
 
     st.markdown("### Current data description")
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/data_description.md",label="data description")
+        show_markdown_file(den.project_dir+"/input_files/data_description.md",label="data description")
     except FileNotFoundError:
         st.write("Data description not set.")
 
-def idea_comp(ap: AstroPilot) -> None:
+def idea_comp(den: Denario) -> None:
 
     st.header("Research idea")
     st.write("Generate a research idea provided the data description.")
@@ -98,9 +98,9 @@ def idea_comp(ap: AstroPilot) -> None:
             with stream_to_streamlit(log_box):
 
                 if fast:
-                    ap.get_idea_fast(llm=llm_model)
+                    den.get_idea_fast(llm=llm_model)
                 else:
-                    ap.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
+                    den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
 
         st.success("Done!")
 
@@ -108,14 +108,14 @@ def idea_comp(ap: AstroPilot) -> None:
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
-        ap.set_idea(content)
+        den.set_idea(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
+        show_markdown_file(den.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
     except FileNotFoundError:
         st.write("Idea not generated or uploaded.")
 
-def method_comp(ap: AstroPilot) -> None:
+def method_comp(den: Denario) -> None:
 
     st.header("Methods")
     st.write("Generate the methods to be employed in the computation of the results, provided the idea and data description.")
@@ -149,9 +149,9 @@ def method_comp(ap: AstroPilot) -> None:
             with stream_to_streamlit(log_box):
 
                 if fast:
-                    ap.get_method_fast(llm=llm_model)
+                    den.get_method_fast(llm=llm_model)
                 else:
-                    ap.get_method()
+                    den.get_method()
 
         st.success("Done!")
 
@@ -159,14 +159,14 @@ def method_comp(ap: AstroPilot) -> None:
 
     if uploaded_file:
         content = uploaded_file.read().decode("utf-8")
-        ap.set_method(content)
+        den.set_method(content)
 
     try:
-        show_markdown_file(ap.project_dir+"/input_files/methods.md",label="methods")
+        show_markdown_file(den.project_dir+"/input_files/methods.md",label="methods")
     except FileNotFoundError:
         st.write("Methods not generated or uploaded.")
         
-def results_comp(ap: AstroPilot) -> None:
+def results_comp(den: Denario) -> None:
 
     st.header("Results")
     st.write("Compute the results, given the methods, idea and data description.")
@@ -206,7 +206,7 @@ def results_comp(ap: AstroPilot) -> None:
             # Redirect console output to app
             with stream_to_streamlit(log_box):
 
-                ap.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
+                den.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
 
         st.success("Done!")
 
@@ -217,12 +217,12 @@ def results_comp(ap: AstroPilot) -> None:
         for file in uploaded_files:
             if file.name.endswith(".md"):
                 content = file.read().decode("utf-8")
-                ap.set_results(content)
+                den.set_results(content)
             else:
                 plots.append(Image.open(file))
-        ap.set_plots(plots)
+        den.set_plots(plots)
 
-    plots = list(Path(ap.project_dir+"/input_files/plots").glob("*"))
+    plots = list(Path(den.project_dir+"/input_files/plots").glob("*"))
 
     num_plots = len(list(plots))
 
@@ -233,7 +233,7 @@ def results_comp(ap: AstroPilot) -> None:
             with plots_cols[i]:
                 st.image(plot, caption=plot.name)
 
-        plots_zip = create_zip_in_memory(ap.project_dir+"/input_files/plots")
+        plots_zip = create_zip_in_memory(den.project_dir+"/input_files/plots")
 
         st.download_button(
             label="Download plots",
@@ -248,7 +248,7 @@ def results_comp(ap: AstroPilot) -> None:
 
     try:
 
-        codes_zip = create_zip_in_memory(ap.project_dir+"/experiment_generation_output")
+        codes_zip = create_zip_in_memory(den.project_dir+"/experiment_generation_output")
 
         st.download_button(
             label="Download codes",
@@ -258,12 +258,12 @@ def results_comp(ap: AstroPilot) -> None:
             icon=":material/download:",
         )
 
-        show_markdown_file(ap.project_dir+"/input_files/results.md",label="results summary")
+        show_markdown_file(den.project_dir+"/input_files/results.md",label="results summary")
 
     except FileNotFoundError:
         st.write("Results not generated or uploaded.")
 
-def paper_comp(ap: AstroPilot) -> None:
+def paper_comp(den: Denario) -> None:
 
     st.header("Article")
     st.write("Write the article using the computed results of the research.")
@@ -302,7 +302,7 @@ def paper_comp(ap: AstroPilot) -> None:
             # Redirect console output to app
             # with stream_to_streamlit(log_box):
 
-            ap.get_paper(journal=selected_journal,
+            den.get_paper(journal=selected_journal,
                         llm=llm_model,
                         writer=writer,
                         add_citations=citations)
@@ -312,13 +312,13 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        texfile = ap.project_dir+"/paper/paper_v4.tex"
+        texfile = den.project_dir+"/paper/paper_v4.tex"
 
         # Ensure that the .tex has been created and we can read it
         with open(texfile, "r") as f:
             f.read()
 
-        paper_zip = create_zip_in_memory(ap.project_dir+"/paper")
+        paper_zip = create_zip_in_memory(den.project_dir+"/paper")
 
         st.download_button(
             label="Download latex files",
@@ -333,7 +333,7 @@ def paper_comp(ap: AstroPilot) -> None:
 
     try:
 
-        pdffile = ap.project_dir+"/paper/paper_v4.pdf"
+        pdffile = den.project_dir+"/paper/paper_v4.pdf"
 
         with open(pdffile, "rb") as pdf_file:
             PDFbyte = pdf_file.read()
@@ -349,7 +349,7 @@ def paper_comp(ap: AstroPilot) -> None:
     except FileNotFoundError:
         st.write("Pdf not generated yet.")
 
-def keywords_comp(ap: AstroPilot) -> None:
+def keywords_comp(den: Denario) -> None:
 
     st.header("Keywords")
     st.write("Generate keywords from your research text.")
@@ -366,12 +366,12 @@ def keywords_comp(ap: AstroPilot) -> None:
     
     if press_button and input_text:
         with st.spinner("Generating keywords..."):
-            ap.get_keywords(input_text, n_keywords=n_keywords)
+            den.get_keywords(input_text, n_keywords=n_keywords)
             
-            if hasattr(ap.research, 'keywords') and ap.research.keywords:
+            if hasattr(den.research, 'keywords') and den.research.keywords:
                 st.success("Keywords generated!")
                 st.write("### Generated Keywords")
-                for keyword, url in ap.research.keywords.items():
+                for keyword, url in den.research.keywords.items():
                     st.markdown(f"- [{keyword}]({url})")
             else:
                 st.error("No keywords were generated. Please try again with different text.")

@@ -47,8 +47,8 @@ WORKDIR $HOME/app
 # Copy all the app code to the docker
 COPY --chown=user . $HOME/app
 
-# Install Astropilot
-RUN pip install astropilot-0.1.0-py3-none-any.whl
+# Install denario
+RUN pip install denario-0.1.0-py3-none-any.whl
 
 # Install
 RUN pip install .
