@@ -4,7 +4,7 @@ from astropilot import AstroPilot
 
 from constants import PROJECT_DIR, LLMs
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
-from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory
+from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
 
 #---
 # Initialize session
@@ -15,6 +15,7 @@ parser.add_argument('--deploy',action='store_true',help='Flag to enable special 
 deploy = parser.parse_args().deploy
 
 if deploy:
+    delete_old_folders()
     project_dir = get_project_dir()
 else:
     project_dir = PROJECT_DIR

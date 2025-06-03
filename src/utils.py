@@ -4,6 +4,8 @@ import zipfile
 import re
 import sys
 import uuid
+import shutil
+import time
 from contextlib import contextmanager
 import streamlit as st
 from astropilot import KeyManager
@@ -81,7 +83,7 @@ def get_project_dir():
 
     if "project_dir" not in st.session_state:
         
-        temp_dir = f"project_{uuid.uuid4().hex}"
+        temp_dir = f"project_dir_{uuid.uuid4().hex}"
         os.makedirs(temp_dir, exist_ok=True)
         
         st.session_state.project_dir = temp_dir
@@ -113,3 +115,35 @@ def stream_to_streamlit(container):
         yield
     finally:
         sys.stdout = old_stdout
+
+def get_latest_mtime_in_folder(folder_path: str) -> float:
+    """
+    Returns the most recent modification time of any file or folder inside the given folder.
+    """
+    latest_mtime = os.path.getmtime(folder_path)
+    for root, dirs, files in os.walk(folder_path):
+        for name in files + dirs:
+            full_path = os.path.join(root, name)
+            try:
+                mtime = os.path.getmtime(full_path)
+                if mtime > latest_mtime:
+                    latest_mtime = mtime
+            except FileNotFoundError:
+                continue  # In case something was removed during walk
+    return latest_mtime
+
+def delete_old_folders(days_old: int = 1):
+    """
+    Deletes folders in the current directory that start with 'project_dir_'
+    if all their contents are older than `days_old` days.
+    Used for the deployed demo version to avoid size issues.
+    """
+    now = time.time()
+    cutoff = now - (days_old * 86400)
+
+    for entry in os.listdir('.'):
+        if os.path.isdir(entry) and entry.startswith("project_dir_"):
+            latest_mtime = get_latest_mtime_in_folder(entry)
+            if latest_mtime < cutoff:
+                print(f"Deleting folder: {entry}")
+                shutil.rmtree(entry)
