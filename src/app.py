@@ -22,12 +22,12 @@ else:
 
 den = Denario(project_dir=project_dir, clear_project_dir=False)
 
-astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
+denarioimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
 # streamlit configuration
 st.set_page_config(
-    page_title="ResearchPilot",         # Title of the app (shown in browser tab)
-    # page_icon=astropilotimg,         # Favicon (icon in browser tab)
+    page_title="Denario",         # Title of the app (shown in browser tab)
+    # page_icon=denarioimg,         # Favicon (icon in browser tab)
     layout="wide",                   # Page layout (options: "centered" or "wide")
     initial_sidebar_state="auto",    # Sidebar behavior
     menu_items=None                  # Custom options for the app menu
@@ -35,7 +35,7 @@ st.set_page_config(
 
 st.session_state["LLM_API_KEYS"] = {}
 
-st.title('ResearchPilot')
+st.title('Denario')
 
 st.markdown("""
     <style>
@@ -110,8 +110,6 @@ with st.sidebar:
                 den.keys[key] = value
 
     st.header("Download project")
-
-    print(den.project_dir)
 
     project_zip = create_zip_in_memory(den.project_dir)
 
