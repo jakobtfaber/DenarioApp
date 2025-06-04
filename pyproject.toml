@@ -1,7 +1,7 @@
 [project]
-name = "astropilotapp"
+name = "denarioapp"
 version = "0.1.0"
-description = "GUI for AstroPilot"
+description = "GUI for Denario"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

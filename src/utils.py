@@ -8,7 +8,7 @@ import shutil
 import time
 from contextlib import contextmanager
 import streamlit as st
-from astropilot import KeyManager
+from denario import KeyManager
 
 from constants import PROJECT_DIR, LLMs
 
@@ -145,5 +145,4 @@ def delete_old_folders(days_old: int = 1):
         if os.path.isdir(entry) and entry.startswith("project_dir_"):
             latest_mtime = get_latest_mtime_in_folder(entry)
             if latest_mtime < cutoff:
-                print(f"Deleting folder: {entry}")
                 shutil.rmtree(entry)

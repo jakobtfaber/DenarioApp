@@ -1,6 +1,6 @@
 import argparse
 import streamlit as st
-from astropilot import AstroPilot
+from denario import Denario
 
 from constants import PROJECT_DIR, LLMs
 from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
@@ -20,14 +20,14 @@ if deploy:
 else:
     project_dir = PROJECT_DIR
 
-ap = AstroPilot(project_dir=project_dir, clear_project_dir=False)
+den = Denario(project_dir=project_dir, clear_project_dir=False)
 
-astropilotimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
+denarioimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
 
 # streamlit configuration
 st.set_page_config(
-    page_title="ResearchPilot",         # Title of the app (shown in browser tab)
-    # page_icon=astropilotimg,         # Favicon (icon in browser tab)
+    page_title="Denario",         # Title of the app (shown in browser tab)
+    # page_icon=denarioimg,         # Favicon (icon in browser tab)
     layout="wide",                   # Page layout (options: "centered" or "wide")
     initial_sidebar_state="auto",    # Sidebar behavior
     menu_items=None                  # Custom options for the app menu
@@ -35,7 +35,7 @@ st.set_page_config(
 
 st.session_state["LLM_API_KEYS"] = {}
 
-st.title('ResearchPilot')
+st.title('Denario')
 
 st.markdown("""
     <style>
@@ -81,7 +81,7 @@ with st.sidebar:
             # If the user enters a key, save it and rerun to refresh the interface
             if api_key:
                 st.session_state["LLM_API_KEYS"][llm] = api_key
-                set_api_keys(ap.keys, api_key, llm)
+                set_api_keys(den.keys, api_key, llm)
             
             # Check session state
             has_key = st.session_state["LLM_API_KEYS"].get(llm)
@@ -107,11 +107,11 @@ with st.sidebar:
 
             for key, value in keys.items():
                 st.session_state["LLM_API_KEYS"][key] = value
-                ap.keys[key] = value
+                den.keys[key] = value
 
     st.header("Download project")
 
-    project_zip = create_zip_in_memory(ap.project_dir)
+    project_zip = create_zip_in_memory(den.project_dir)
 
     st.download_button(
         label="Download all project files",
@@ -127,7 +127,7 @@ with st.sidebar:
 
 st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing methods, computing results and writing papers.")
 
-st.caption("[Get the source code here](https://github.com/AstroPilot-AI/AstroPilot.git).")
+st.caption("[Get the source code here](https://github.com/AstroPilot-AI/Denario.git).")
 
 tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs([
     "**Description**", 
@@ -139,19 +139,19 @@ tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs
 ])
 
 with tab_descr:
-    description_comp(ap)
+    description_comp(den)
 
 with tab_idea:
-    idea_comp(ap)
+    idea_comp(den)
 
 with tab_method:
-    method_comp(ap)
+    method_comp(den)
 
 with tab_restults:
-    results_comp(ap)
+    results_comp(den)
 
 with tab_paper:
-    paper_comp(ap)
+    paper_comp(den)
 
 with tab_keywords:
-    keywords_comp(ap)
+    keywords_comp(den)
