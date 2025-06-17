@@ -105,7 +105,7 @@ class StreamToBuffer(io.StringIO):
 def stream_to_streamlit(container):
 
     buffer = StreamToBuffer(update_callback=lambda text: container.markdown(
-        f"""<div class="log-box">{text.replace('\n', '<br>')}</div>""",
+        f'<div class="log-box">{text.replace("\\n", "<br>")}</div>',
         unsafe_allow_html=True
     ))
 

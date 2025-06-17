@@ -98,7 +98,7 @@ def idea_comp(den: Denario) -> None:
             with stream_to_streamlit(log_box):
 
                 if fast:
-                    den.get_idea_fast(llm=llm_model)
+                    den.get_idea_fast(llm=llm_model, verbose=True)
                 else:
                     den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
 
@@ -149,7 +149,7 @@ def method_comp(den: Denario) -> None:
             with stream_to_streamlit(log_box):
 
                 if fast:
-                    den.get_method_fast(llm=llm_model)
+                    den.get_method_fast(llm=llm_model, verbose=True)
                 else:
                     den.get_method()
 
