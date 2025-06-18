@@ -174,8 +174,8 @@ def results_comp(den: Denario) -> None:
     model_keys = list(models.keys())
 
     # Get index of desired default models
-    default_researcher_index = model_keys.index("o3-mini")
-    default_engineer_index = model_keys.index("claude-3.7-sonnet")
+    default_researcher_index = model_keys.index("gemini-2.5-pro")
+    default_engineer_index = model_keys.index("gemini-2.5-pro")
 
     # Add model selection dropdowns
     col1, col2 = st.columns(2)
@@ -196,6 +196,10 @@ def results_comp(den: Denario) -> None:
             key="researcher_model"
         )
 
+    ## add option dropdown for restart at step
+    with st.expander("Options for the results generation"):
+        restart_at_step = st.number_input("Restart at step", min_value=0, max_value=100, value=0)
+
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
@@ -206,7 +210,9 @@ def results_comp(den: Denario) -> None:
             # Redirect console output to app
             with stream_to_streamlit(log_box):
 
-                den.get_results(engineer_model=models[engineer_model], researcher_model=models[researcher_model])
+                den.get_results(engineer_model=models[engineer_model], 
+                                researcher_model=models[researcher_model],
+                                restart_at_step=restart_at_step)
 
         st.success("Done!")
 
