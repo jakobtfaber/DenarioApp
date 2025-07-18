@@ -3,7 +3,7 @@ import streamlit as st
 from denario import Denario
 
 from constants import PROJECT_DIR, LLMs
-from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp
+from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp
 from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
 
 #---
@@ -129,12 +129,13 @@ st.write("AI agents to assist the development of a scientific research process. 
 
 st.caption("[Get the source code here](https://github.com/AstroPilot-AI/Denario.git).")
 
-tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_keywords = st.tabs([
+tab_descr, tab_idea, tab_method, tab_restults, tab_paper,  tab_check_idea, tab_keywords,= st.tabs([
     "**Description**", 
     "**Idea**", 
     "**Methods**", 
     "**Results**", 
     "**Paper**", 
+    "Check idea",
     "Keywords"
 ])
 
@@ -152,6 +153,9 @@ with tab_restults:
 
 with tab_paper:
     paper_comp(den)
+
+with tab_check_idea:
+    check_idea_comp(den)
 
 with tab_keywords:
     keywords_comp(den)
