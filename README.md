@@ -18,7 +18,7 @@ Install the GUI from source following one of the following steps.
    uv sync
    ```
 
-Run the webapp with:
+Run the app with:
 
 ```bash
 streamlit run src/app.py
@@ -26,7 +26,7 @@ streamlit run src/app.py
 
 ## Run in Docker
 
-You need the wheel of a build of denario. You may need `sudo` permission [or use this link](https://docs.docker.com/engine/install/linux-postinstall/). To build the docker run:
+You may need `sudo` permission [or use this link](https://docs.docker.com/engine/install/linux-postinstall/). To build the docker run:
 
 ```bash
 docker build -t denario-app .
@@ -50,7 +50,7 @@ You can also use [docker compose](https://docs.docker.com/compose/), you can jus
 docker compose up --watch
 ```
 
-to build the iamge and run the container.
+to build the image and run the container.
 
 ## TODO
 
