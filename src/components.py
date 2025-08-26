@@ -360,25 +360,30 @@ def check_idea_comp(den: Denario) -> None:
     st.header("Check idea")
     st.write("Check if the research idea has been investigated in previous literature.")
 
+    fast = st.toggle("Fast generation",value=True,key="fast_toggle_check_idea")
+
     try:
         den.set_idea()
         idea = den.research.idea
-        st.write(idea)
 
         # show current idea
-        st.write("Current idea:")
+        st.markdown("### Current idea")
         st.write(idea)
 
         press_button = st.button("Literature search", type="primary", key="get_literature")
         
         if press_button:
             with st.spinner("Searching for previous literature...", show_time=True):
-                result = den.check_idea()
+
+                if fast:
+                    result = den.check_idea_fast()
+                else:
+                    result = den.check_idea()
+                    st.write(result)
 
             st.success("Literature search completed!")
-            st.write(result)
 
-    except:
+    except FileNotFoundError:
         st.write("Need to generate an idea first.")
 
     
