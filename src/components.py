@@ -375,11 +375,16 @@ def check_idea_comp(den: Denario) -> None:
         if press_button:
             with st.spinner("Searching for previous literature...", show_time=True):
 
-                if fast:
-                    result = den.check_idea_fast()
-                else:
-                    result = den.check_idea()
-                    st.write(result)
+                log_box = st.empty()
+
+                # Redirect console output to app
+                with stream_to_streamlit(log_box):
+
+                    if fast:
+                        result = den.check_idea_fast()
+                    else:
+                        result = den.check_idea()
+                        st.write(result)
 
             st.success("Literature search completed!")
 
