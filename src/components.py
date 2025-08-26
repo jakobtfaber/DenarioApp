@@ -360,20 +360,26 @@ def check_idea_comp(den: Denario) -> None:
     st.header("Check idea")
     st.write("Check if the research idea has been investigated in previous literature.")
 
-    # show current idea
-    st.write("Current idea:")
-    den.set_idea()
-    idea = den.research.idea
-    st.write(idea)
+    try:
+        den.set_idea()
+        idea = den.research.idea
+        st.write(idea)
 
-    press_button = st.button("Literature search", type="primary", key="get_literature")
-    
-    if press_button:
-        with st.spinner("Searching for previous literature...", show_time=True):
-            result = den.check_idea()
+        # show current idea
+        st.write("Current idea:")
+        st.write(idea)
 
-        st.success("Literature search completed!")
-        st.write(result)
+        press_button = st.button("Literature search", type="primary", key="get_literature")
+        
+        if press_button:
+            with st.spinner("Searching for previous literature...", show_time=True):
+                result = den.check_idea()
+
+            st.success("Literature search completed!")
+            st.write(result)
+
+    except:
+        st.write("Need to generate an idea first.")
 
     
 
