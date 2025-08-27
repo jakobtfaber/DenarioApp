@@ -381,7 +381,7 @@ def check_idea_comp(den: Denario) -> None:
                 with stream_to_streamlit(log_box):
 
                     if fast:
-                        result = den.check_idea_fast()
+                        result = den.check_idea_fast(verbose=True)
                     else:
                         result = den.check_idea()
                         st.write(result)
