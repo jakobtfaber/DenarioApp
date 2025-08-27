@@ -1,5 +1,5 @@
 [project]
-name = "DenarioApp"
+name = "denario_app"
 version = "0.1.0"
 description = "GUI for Denario"
 readme = "README.md"
