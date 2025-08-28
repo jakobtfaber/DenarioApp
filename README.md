@@ -21,7 +21,7 @@ Install the GUI from source following one of the following steps.
 Run the app with:
 
 ```bash
-streamlit run src/app.py
+streamlit run src/denario_app/app.py
 ```
 
 ## Run in Docker

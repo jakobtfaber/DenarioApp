@@ -59,4 +59,4 @@ RUN touch .env
 # Command to run the app
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-CMD ["streamlit", "run", "src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "src/denario_app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
