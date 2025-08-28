@@ -1,0 +1,28 @@
+# TODO
+
+- [x] Prerender markdown files if they exist
+- [x] Add option to browse files
+- [x] Add option to set ideas, methods, results, through files
+- [ ] Ensure that plots are shown in markdown results
+- [x] Render latex pdf in app
+- [ ] Refactor components code since there is a lot of duplication
+- [x] Add keywords tab
+- [x] Allow for providing API keys through the sidebar
+- [ ] Show total computing time
+- [x] Run in Docker
+- [ ] Include API validators
+- [x] Download .md files
+- [x] Upload .env directly
+- [x] Print console log in GUI
+- [ ] Show files in project
+- [x] Allow to download plots
+- [x] Allow to download tex and pdf
+- [x] Allow to upload several project files at the same time
+- [x] Modify dockerfile to build with uv for faster build
+- [x] Generate pdf from latex for all journals
+- [x] Allow to upload plots
+- [x] Allow for different users
+- [x] Allow to download generated code
+- [x] Add download project button
+- [ ] Show API keys active if .env is uploaded
+- [ ] Add generate button if it fails instead of reloading page
