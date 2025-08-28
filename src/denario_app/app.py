@@ -86,11 +86,11 @@ with st.sidebar:
             # Check session state
             has_key = st.session_state["LLM_API_KEYS"].get(llm)
             
-            # Display status after the key is saved
-            if has_key:
-                st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
-            else:
-                st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
+            # # Display status after the key is saved
+            # if has_key:
+            #     st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
+            # else:
+            #     st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
 
         st.markdown("""Or just upload a .env file with the following keys and reload the page:
                     ```
