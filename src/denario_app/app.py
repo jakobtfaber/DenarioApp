@@ -1,3 +1,4 @@
+import os
 import argparse
 import streamlit as st
 from denario import Denario
@@ -108,6 +109,17 @@ with st.sidebar:
             for key, value in keys.items():
                 st.session_state["LLM_API_KEYS"][key] = value
                 den.keys[key] = value
+
+    st.header("Upload data")
+
+    uploaded_data = st.file_uploader("Upload the data files", accept_multiple_files=True)
+
+    if uploaded_data:
+        os.makedirs(f"{den.project_dir}/data/", exist_ok=True)
+        for uploaded_file in uploaded_data:
+            with open(f"{den.project_dir}/data/{uploaded_file.name}", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+        st.success("Files uploaded successfully!")
 
     st.header("Download project")
 
