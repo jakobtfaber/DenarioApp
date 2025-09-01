@@ -200,6 +200,8 @@ def results_comp(den: Denario) -> None:
     with st.expander("Options for the results generation"):
         restart_at_step = st.number_input("Restart at step", min_value=0, max_value=100, value=0)
 
+        hardware_constraints = st.text_input("Hardware constraints", placeholder="cpu:2, ram:16g, gpu:1")
+    
     press_button = st.button("Generate", type="primary",key="get_results")
     if press_button:
 
@@ -212,7 +214,8 @@ def results_comp(den: Denario) -> None:
 
                 den.get_results(engineer_model=models[engineer_model], 
                                 researcher_model=models[researcher_model],
-                                restart_at_step=restart_at_step)
+                                restart_at_step=restart_at_step,
+                                hardware_constraints=hardware_constraints)
 
         st.success("Done!")
 
