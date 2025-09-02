@@ -2,6 +2,8 @@
 
 GUI for [Denario](https://github.com/AstroPilot-AI/Denario.git), powered by [streamlit](https://streamlit.io).
 
+[Test a deployed demo of this app in HugginFace Spaces.](https://huggingface.co/spaces/astropilot-ai/Denario)
+
 ## Run locally
 
 Install the GUI from source following one of the following steps.
