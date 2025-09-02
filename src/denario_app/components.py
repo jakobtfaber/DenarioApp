@@ -321,7 +321,7 @@ def paper_comp(den: Denario) -> None:
 
     try:
 
-        texfile = den.project_dir+"/paper/paper_v4.tex"
+        texfile = den.project_dir+"/paper/paper_v4_final.tex"
 
         # Ensure that the .tex has been created and we can read it
         with open(texfile, "r") as f:
@@ -342,7 +342,7 @@ def paper_comp(den: Denario) -> None:
 
     try:
 
-        pdffile = den.project_dir+"/paper/paper_v4.pdf"
+        pdffile = den.project_dir+"/paper/paper_v4_final.pdf"
 
         with open(pdffile, "rb") as pdf_file:
             PDFbyte = pdf_file.read()
