@@ -117,6 +117,20 @@ def idea_comp(den: Denario) -> None:
     with col2:
         stop_button = st.button("Stop", type="secondary", key="stop_idea", disabled=not st.session_state.idea_running)
     
+    # Add custom CSS for red border on stop button
+    st.markdown("""
+        <style>
+        div[data-testid="column"]:nth-of-type(2) button {
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
+        }
+        div[data-testid="column"]:nth-of-type(2) button:hover {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     if press_button and not st.session_state.idea_running:
         st.session_state.idea_running = True
         st.rerun()
@@ -189,6 +203,20 @@ def method_comp(den: Denario) -> None:
         press_button = st.button("Generate", type="primary", key="get_method", disabled=st.session_state.method_running)
     with col2:
         stop_button = st.button("Stop", type="secondary", key="stop_method", disabled=not st.session_state.method_running)
+    
+    # Add custom CSS for red border on stop button
+    st.markdown("""
+        <style>
+        div[data-testid="column"]:nth-of-type(2) button {
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
+        }
+        div[data-testid="column"]:nth-of-type(2) button:hover {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
     
     if press_button and not st.session_state.method_running:
         st.session_state.method_running = True
@@ -274,6 +302,20 @@ def results_comp(den: Denario) -> None:
         press_button = st.button("Generate", type="primary", key="get_results", disabled=st.session_state.results_running)
     with col2:
         stop_button = st.button("Stop", type="secondary", key="stop_results", disabled=not st.session_state.results_running)
+    
+    # Add custom CSS for red border on stop button
+    st.markdown("""
+        <style>
+        div[data-testid="column"]:nth-of-type(2) button {
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
+        }
+        div[data-testid="column"]:nth-of-type(2) button:hover {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
     
     if press_button and not st.session_state.results_running:
         st.session_state.results_running = True
@@ -395,6 +437,20 @@ def paper_comp(den: Denario) -> None:
     with col2:
         stop_button = st.button("Stop", type="secondary", key="stop_paper", disabled=not st.session_state.paper_running)
     
+    # Add custom CSS for red border on stop button
+    st.markdown("""
+        <style>
+        div[data-testid="column"]:nth-of-type(2) button {
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
+        }
+        div[data-testid="column"]:nth-of-type(2) button:hover {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     if press_button and not st.session_state.paper_running:
         st.session_state.paper_running = True
         st.rerun()
@@ -488,6 +544,20 @@ def check_idea_comp(den: Denario) -> None:
         with col2:
             stop_button = st.button("Stop", type="secondary", key="stop_literature", disabled=not st.session_state.literature_running)
         
+        # Add custom CSS for red border on stop button
+        st.markdown("""
+            <style>
+            div[data-testid="column"]:nth-of-type(2) button {
+                border: 2px solid #ff4444 !important;
+                color: #ff4444 !important;
+            }
+            div[data-testid="column"]:nth-of-type(2) button:hover {
+                background-color: #ff4444 !important;
+                color: white !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
         if press_button and not st.session_state.literature_running:
             st.session_state.literature_running = True
             st.rerun()
@@ -544,6 +614,20 @@ def keywords_comp(den: Denario) -> None:
         press_button = st.button("Generate Keywords", type="primary", key="get_keywords", disabled=st.session_state.keywords_running)
     with col2:
         stop_button = st.button("Stop", type="secondary", key="stop_keywords", disabled=not st.session_state.keywords_running)
+    
+    # Add custom CSS for red border on stop button
+    st.markdown("""
+        <style>
+        div[data-testid="column"]:nth-of-type(2) button {
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
+        }
+        div[data-testid="column"]:nth-of-type(2) button:hover {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
     
     if press_button and input_text and not st.session_state.keywords_running:
         st.session_state.keywords_running = True
