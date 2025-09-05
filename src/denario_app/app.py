@@ -67,7 +67,7 @@ with st.sidebar:
     # st.image(astropilotimg)
 
     st.header("API keys")
-    st.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below.*")
+    st.markdown("*Input OpenAI, Anthropic, Gemini and Perplexity API keys below. See [here](https://denario.readthedocs.io/en/latest/apikeys/) for more information.*")
 
     with st.expander("Set API keys"):
 
