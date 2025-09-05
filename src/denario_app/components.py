@@ -194,6 +194,38 @@ def method_comp(den: Denario) -> None:
             key="llm_model_method"
         )
 
+    else:
+
+        default_planner_index = model_keys.index("gpt-4o")
+        default_plan_reviewer_index = model_keys.index("claude-3.7-sonnet")
+        default_method_generator_index = model_keys.index("gpt-4o")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.caption("Planner: Creates a detailed plan for generating research methodology")
+            planner_model = st.selectbox(
+                "Planner Model",
+                model_keys,
+                index=default_planner_index,
+                key="planner_model"
+            )
+        with col2:
+            st.caption("Plan Reviewer: Reviews and improves the generated methodology plan")
+            plan_reviewer_model = st.selectbox(
+                "Plan Reviewer Model", 
+                model_keys,
+                index=default_plan_reviewer_index,
+                key="plan_reviewer_model"
+            )
+        col3, col4 = st.columns(2)
+        with col3:
+            st.caption("Method Generator: Generates the methodology")
+            method_generator_model = st.selectbox(
+                "Method Generator Model", 
+                model_keys,
+                index=default_method_generator_index,
+                key="method_generator_model"
+            )
     # Initialize session state for tracking operations
     if "method_running" not in st.session_state:
         st.session_state.method_running = False
@@ -237,7 +269,9 @@ def method_comp(den: Denario) -> None:
                     if fast:
                         den.get_method_fast(llm=llm_model, verbose=True)
                     else:
-                        den.get_method()
+                        den.get_method(planner_model=planner_model, 
+                                       plan_reviewer_model=plan_reviewer_model, 
+                                       method_generator_model=method_generator_model)
                     
                     if st.session_state.method_running:  # Only show success if not stopped
                         st.success("Done!")
