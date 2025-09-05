@@ -107,23 +107,44 @@ def idea_comp(den: Denario) -> None:
                 key="plan_reviewer_model"
             )
     
-    press_button = st.button("Generate", type="primary",key="get_idea")
-    if press_button:
-
+    # Initialize session state for tracking operations
+    if "idea_running" not in st.session_state:
+        st.session_state.idea_running = False
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        press_button = st.button("Generate", type="primary", key="get_idea", disabled=st.session_state.idea_running)
+    with col2:
+        stop_button = st.button("Stop", type="secondary", key="stop_idea", disabled=not st.session_state.idea_running)
+    
+    if press_button and not st.session_state.idea_running:
+        st.session_state.idea_running = True
+        st.rerun()
+    
+    if stop_button and st.session_state.idea_running:
+        st.session_state.idea_running = False
+        st.warning("Operation stopped by user.")
+        st.rerun()
+    
+    if st.session_state.idea_running:
         with st.spinner("Generating research idea...", show_time=True):
-
             log_box = st.empty()
-
+            
             # Redirect console output to app
             with stream_to_streamlit(log_box):
-
-                if fast:
-                    den.get_idea_fast(llm=llm_model, verbose=True)
-                else:
-                    den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model], 
-                                 planner_model=models[planner_model], plan_reviewer_model=models[plan_reviewer_model])
-
-        st.success("Done!")
+                try:
+                    if fast:
+                        den.get_idea_fast(llm=llm_model, verbose=True)
+                    else:
+                        den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model], 
+                                     planner_model=models[planner_model], plan_reviewer_model=models[plan_reviewer_model])
+                    
+                    if st.session_state.idea_running:  # Only show success if not stopped
+                        st.success("Done!")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                finally:
+                    st.session_state.idea_running = False
 
     uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False)
 
@@ -159,22 +180,43 @@ def method_comp(den: Denario) -> None:
             key="llm_model_method"
         )
 
-    press_button = st.button("Generate", type="primary",key="get_method")
-    if press_button:
-
+    # Initialize session state for tracking operations
+    if "method_running" not in st.session_state:
+        st.session_state.method_running = False
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        press_button = st.button("Generate", type="primary", key="get_method", disabled=st.session_state.method_running)
+    with col2:
+        stop_button = st.button("Stop", type="secondary", key="stop_method", disabled=not st.session_state.method_running)
+    
+    if press_button and not st.session_state.method_running:
+        st.session_state.method_running = True
+        st.rerun()
+    
+    if stop_button and st.session_state.method_running:
+        st.session_state.method_running = False
+        st.warning("Operation stopped by user.")
+        st.rerun()
+    
+    if st.session_state.method_running:
         with st.spinner("Generating methods...", show_time=True):
-
             log_box = st.empty()
-
+            
             # Redirect console output to app
             with stream_to_streamlit(log_box):
-
-                if fast:
-                    den.get_method_fast(llm=llm_model, verbose=True)
-                else:
-                    den.get_method()
-
-        st.success("Done!")
+                try:
+                    if fast:
+                        den.get_method_fast(llm=llm_model, verbose=True)
+                    else:
+                        den.get_method()
+                    
+                    if st.session_state.method_running:  # Only show success if not stopped
+                        st.success("Done!")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                finally:
+                    st.session_state.method_running = False
 
     uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False)
 
@@ -223,22 +265,43 @@ def results_comp(den: Denario) -> None:
 
         hardware_constraints = st.text_input("Hardware constraints", placeholder="cpu:2, ram:16g, gpu:1")
     
-    press_button = st.button("Generate", type="primary",key="get_results")
-    if press_button:
-
+    # Initialize session state for tracking operations
+    if "results_running" not in st.session_state:
+        st.session_state.results_running = False
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        press_button = st.button("Generate", type="primary", key="get_results", disabled=st.session_state.results_running)
+    with col2:
+        stop_button = st.button("Stop", type="secondary", key="stop_results", disabled=not st.session_state.results_running)
+    
+    if press_button and not st.session_state.results_running:
+        st.session_state.results_running = True
+        st.rerun()
+    
+    if stop_button and st.session_state.results_running:
+        st.session_state.results_running = False
+        st.warning("Operation stopped by user.")
+        st.rerun()
+    
+    if st.session_state.results_running:
         with st.spinner("Computing results...", show_time=True):
-
             log_box = st.empty()
-
+            
             # Redirect console output to app
             with stream_to_streamlit(log_box):
-
-                den.get_results(engineer_model=models[engineer_model], 
-                                researcher_model=models[researcher_model],
-                                restart_at_step=restart_at_step,
-                                hardware_constraints=hardware_constraints)
-
-        st.success("Done!")
+                try:
+                    den.get_results(engineer_model=models[engineer_model], 
+                                    researcher_model=models[researcher_model],
+                                    restart_at_step=restart_at_step,
+                                    hardware_constraints=hardware_constraints)
+                    
+                    if st.session_state.results_running:  # Only show success if not stopped
+                        st.success("Done!")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                finally:
+                    st.session_state.results_running = False
 
     uploaded_files = st.file_uploader("Upload markdown file and/or plots from the results of the research", accept_multiple_files=True)
 
@@ -322,23 +385,44 @@ def paper_comp(den: Denario) -> None:
             value="scientist",
         )
 
-    press_button = st.button("Generate", type="primary",key="get_paper")
-    if press_button:
-
+    # Initialize session state for tracking operations
+    if "paper_running" not in st.session_state:
+        st.session_state.paper_running = False
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        press_button = st.button("Generate", type="primary", key="get_paper", disabled=st.session_state.paper_running)
+    with col2:
+        stop_button = st.button("Stop", type="secondary", key="stop_paper", disabled=not st.session_state.paper_running)
+    
+    if press_button and not st.session_state.paper_running:
+        st.session_state.paper_running = True
+        st.rerun()
+    
+    if stop_button and st.session_state.paper_running:
+        st.session_state.paper_running = False
+        st.warning("Operation stopped by user.")
+        st.rerun()
+    
+    if st.session_state.paper_running:
         with st.spinner("Writing the paper...", show_time=True):
-
             # log_box = st.empty()
 
             # Redirect console output to app
             # with stream_to_streamlit(log_box):
-
-            den.get_paper(journal=selected_journal,
-                        llm=llm_model,
-                        writer=writer,
-                        add_citations=citations)
-
-        st.success("Done!")
-        st.balloons()
+            try:
+                den.get_paper(journal=selected_journal,
+                            llm=llm_model,
+                            writer=writer,
+                            add_citations=citations)
+                
+                if st.session_state.paper_running:  # Only show success if not stopped
+                    st.success("Done!")
+                    st.balloons()
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+            finally:
+                st.session_state.paper_running = False
 
     try:
 
@@ -394,23 +478,44 @@ def check_idea_comp(den: Denario) -> None:
         st.markdown("### Current idea")
         st.write(idea)
 
-        press_button = st.button("Literature search", type="primary", key="get_literature")
+        # Initialize session state for tracking operations
+        if "literature_running" not in st.session_state:
+            st.session_state.literature_running = False
         
-        if press_button:
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            press_button = st.button("Literature search", type="primary", key="get_literature", disabled=st.session_state.literature_running)
+        with col2:
+            stop_button = st.button("Stop", type="secondary", key="stop_literature", disabled=not st.session_state.literature_running)
+        
+        if press_button and not st.session_state.literature_running:
+            st.session_state.literature_running = True
+            st.rerun()
+        
+        if stop_button and st.session_state.literature_running:
+            st.session_state.literature_running = False
+            st.warning("Operation stopped by user.")
+            st.rerun()
+        
+        if st.session_state.literature_running:
             with st.spinner("Searching for previous literature...", show_time=True):
-
                 log_box = st.empty()
 
                 # Redirect console output to app
                 with stream_to_streamlit(log_box):
-
-                    if fast:
-                        result = den.check_idea_fast(verbose=True)
-                    else:
-                        result = den.check_idea()
-                        st.write(result)
-
-            st.success("Literature search completed!")
+                    try:
+                        if fast:
+                            result = den.check_idea_fast(verbose=True)
+                        else:
+                            result = den.check_idea()
+                            st.write(result)
+                        
+                        if st.session_state.literature_running:  # Only show success if not stopped
+                            st.success("Literature search completed!")
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
+                    finally:
+                        st.session_state.literature_running = False
 
     except FileNotFoundError:
         st.write("Need to generate an idea first.")
@@ -430,18 +535,41 @@ def keywords_comp(den: Denario) -> None:
     
     n_keywords = st.slider("Number of keywords to generate:", min_value=1, max_value=10, value=5)
     
-    press_button = st.button("Generate Keywords", type="primary", key="get_keywords")
+    # Initialize session state for tracking operations
+    if "keywords_running" not in st.session_state:
+        st.session_state.keywords_running = False
     
-    if press_button and input_text:
-        with st.spinner("Generating keywords..."):
-            den.get_keywords(input_text, n_keywords=n_keywords)
-            
-            if hasattr(den.research, 'keywords') and den.research.keywords:
-                st.success("Keywords generated!")
-                st.write("### Generated Keywords")
-                for keyword, url in den.research.keywords.items():
-                    st.markdown(f"- [{keyword}]({url})")
-            else:
-                st.error("No keywords were generated. Please try again with different text.")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        press_button = st.button("Generate Keywords", type="primary", key="get_keywords", disabled=st.session_state.keywords_running)
+    with col2:
+        stop_button = st.button("Stop", type="secondary", key="stop_keywords", disabled=not st.session_state.keywords_running)
+    
+    if press_button and input_text and not st.session_state.keywords_running:
+        st.session_state.keywords_running = True
+        st.rerun()
     elif press_button and not input_text:
         st.warning("Please enter some text to generate keywords.")
+    
+    if stop_button and st.session_state.keywords_running:
+        st.session_state.keywords_running = False
+        st.warning("Operation stopped by user.")
+        st.rerun()
+    
+    if st.session_state.keywords_running and input_text:
+        with st.spinner("Generating keywords..."):
+            try:
+                den.get_keywords(input_text, n_keywords=n_keywords)
+                
+                if st.session_state.keywords_running:  # Only show success if not stopped
+                    if hasattr(den.research, 'keywords') and den.research.keywords:
+                        st.success("Keywords generated!")
+                        st.write("### Generated Keywords")
+                        for keyword, url in den.research.keywords.items():
+                            st.markdown(f"- [{keyword}]({url})")
+                    else:
+                        st.error("No keywords were generated. Please try again with different text.")
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+            finally:
+                st.session_state.keywords_running = False
