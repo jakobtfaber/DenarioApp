@@ -86,6 +86,26 @@ def idea_comp(den: Denario) -> None:
                 index=default_idea_hater_index,
                 key="idea_hater_model"
             )
+
+    if not fast:
+        # Add planner and plan reviewer model selection dropdowns
+        col3, col4 = st.columns(2)
+        with col3:
+            st.caption("Planner: Creates a detailed plan for generating research ideas")
+            planner_model = st.selectbox(
+                "Planner Model",
+                model_keys,
+                index=model_keys.index("gpt-4o"),
+                key="planner_model"
+            )
+        with col4:
+            st.caption("Plan Reviewer: Reviews and improves the generated plan")
+            plan_reviewer_model = st.selectbox(
+                "Plan Reviewer Model", 
+                model_keys,
+                index=model_keys.index("claude-3.7-sonnet"),
+                key="plan_reviewer_model"
+            )
     
     press_button = st.button("Generate", type="primary",key="get_idea")
     if press_button:
@@ -100,7 +120,8 @@ def idea_comp(den: Denario) -> None:
                 if fast:
                     den.get_idea_fast(llm=llm_model, verbose=True)
                 else:
-                    den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model])
+                    den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model], 
+                                 planner_model=models[planner_model], plan_reviewer_model=models[plan_reviewer_model])
 
         st.success("Done!")
 
