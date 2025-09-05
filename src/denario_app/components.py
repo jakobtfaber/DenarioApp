@@ -326,6 +326,34 @@ def results_comp(den: Denario) -> None:
         restart_at_step = st.number_input("Restart at step", min_value=0, max_value=100, value=0)
 
         hardware_constraints = st.text_input("Hardware constraints", placeholder="cpu:2, ram:16g, gpu:1")
+
+        default_planner_index = model_keys.index("gpt-4o")
+        default_plan_reviewer_index = model_keys.index("claude-3.7-sonnet")
+
+        # add options to control planner, plan_reviewer, researcher and engineer models
+        col1, col2 = st.columns(2)
+        with col1:
+            st.caption("Planner: Creates a detailed plan for generating research results")
+            planner_model = st.selectbox(
+                "Planner Model",
+                model_keys,
+                index=default_planner_index,
+                key="planner_model"
+            )
+        with col2:
+            st.caption("Plan Reviewer: Reviews and improves the proposed plan")
+            plan_reviewer_model = st.selectbox(
+                "Plan Reviewer Model", 
+                model_keys,
+                index=default_plan_reviewer_index,
+                key="plan_reviewer_model"
+            )
+
+        # set max n attempts
+        max_n_attempts = st.number_input("Max number of code execution attempts", min_value=1, max_value=10, value=6)
+
+        # max n steps
+        max_n_steps = st.number_input("Max number of steps", min_value=1, max_value=10, value=6)
     
     # Initialize session state for tracking operations
     if "results_running" not in st.session_state:
@@ -370,7 +398,11 @@ def results_comp(den: Denario) -> None:
                     den.get_results(engineer_model=models[engineer_model], 
                                     researcher_model=models[researcher_model],
                                     restart_at_step=restart_at_step,
-                                    hardware_constraints=hardware_constraints)
+                                    hardware_constraints=hardware_constraints,
+                                    planner_model=models[planner_model],
+                                    plan_reviewer_model=models[plan_reviewer_model],
+                                    max_n_attempts=max_n_attempts,
+                                    max_n_steps=max_n_steps)
                     
                     if st.session_state.results_running:  # Only show success if not stopped
                         st.success("Done!")
