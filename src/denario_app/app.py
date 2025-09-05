@@ -94,12 +94,13 @@ with st.sidebar:
             #     st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
 
         st.markdown("""Or just upload a .env file with the following keys and reload the page:
-                    ```
-                    OPENAI_API_KEY="..."
-                    ANTHROPIC_API_KEY="..."
-                    GEMINI_API_KEY="..."
-                    PERPLEXITY_API_KEY="..."
-                    ```
+                    
+```
+OPENAI_API_KEY="..."
+ANTHROPIC_API_KEY="..."
+GEMINI_API_KEY="..."
+PERPLEXITY_API_KEY="..."
+```
                     """)
         uploaded_dotenv = st.file_uploader("Upload the .env file", accept_multiple_files=False)
 
