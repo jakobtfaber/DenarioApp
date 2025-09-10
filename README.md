@@ -4,6 +4,8 @@ GUI for [Denario](https://github.com/AstroPilot-AI/Denario.git), powered by [str
 
 [Test a deployed demo of this app in HugginFace Spaces.](https://huggingface.co/spaces/astropilot-ai/Denario)
 
+<img width="1793" height="694" alt="Screenshot from 2025-09-10 18-30-46" src="https://github.com/user-attachments/assets/2c524601-13ff-492b-addb-173323aaa15b" />
+
 ## Run locally
 
 Install the GUI from source following one of the following steps.
