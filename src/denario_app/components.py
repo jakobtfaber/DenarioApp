@@ -96,7 +96,7 @@ def idea_comp(den: Denario) -> None:
                 "Planner Model",
                 model_keys,
                 index=model_keys.index("gpt-4o"),
-                key="planner_model"
+                key="idea_planner_model"
             )
         with col4:
             st.caption("Plan Reviewer: Reviews and improves the generated plan")
@@ -104,7 +104,7 @@ def idea_comp(den: Denario) -> None:
                 "Plan Reviewer Model", 
                 model_keys,
                 index=model_keys.index("claude-3.7-sonnet"),
-                key="plan_reviewer_model"
+                key="idea_plan_reviewer_model"
             )
     
     # Initialize session state for tracking operations
@@ -207,7 +207,7 @@ def method_comp(den: Denario) -> None:
                 "Planner Model",
                 model_keys,
                 index=default_planner_index,
-                key="planner_model"
+                key="method_planner_model"
             )
         with col2:
             st.caption("Plan Reviewer: Reviews and improves the generated methodology plan")
@@ -215,7 +215,7 @@ def method_comp(den: Denario) -> None:
                 "Plan Reviewer Model", 
                 model_keys,
                 index=default_plan_reviewer_index,
-                key="plan_reviewer_model"
+                key="method_plan_reviewer_model"
             )
         col3, col4 = st.columns(2)
         with col3:
@@ -338,7 +338,7 @@ def results_comp(den: Denario) -> None:
                 "Planner Model",
                 model_keys,
                 index=default_planner_index,
-                key="planner_model"
+                key="results_planner_model"
             )
         with col2:
             st.caption("Plan Reviewer: Reviews and improves the proposed plan")
@@ -346,7 +346,7 @@ def results_comp(den: Denario) -> None:
                 "Plan Reviewer Model", 
                 model_keys,
                 index=default_plan_reviewer_index,
-                key="plan_reviewer_model"
+                key="results_plan_reviewer_model"
             )
 
         # set max n attempts
