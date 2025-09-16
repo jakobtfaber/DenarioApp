@@ -85,3 +85,17 @@ docker compose up --watch
 ```
 
 to build the image and run the container.
+
+## Contributing
+
+Pull requests are welcome! Feel free to open an issue for bugs, comments, questions and suggestions.
+
+## License
+
+[GNU GENERAL PUBLIC LICENSE (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html)
+
+Denario - Copyright (C) 2025 Pablo Villanueva-Domingo, Francisco Villaescusa-Navarro, Boris Bolliet
+
+## Contact and Enquieries
+
+E-mail: [denario.astropilot.ai@gmail.com](mailto:denario.astropilot.ai@gmail.com)
