@@ -106,6 +106,24 @@ def idea_comp(den: Denario) -> None:
                 index=model_keys.index("claude-3.7-sonnet"),
                 key="idea_plan_reviewer_model"
             )
+
+        col5, col6 = st.columns(2)
+        with col5:
+            st.caption("Default Orchestration Model")
+            default_orchestration_model = st.selectbox(
+                "Default Orchestration Model",
+                model_keys,
+                index=model_keys.index("gpt-4.1"),
+                key="idea_orchestration_model"
+            )
+        with col6:
+            st.caption("Default Formatter Model")
+            default_formatter_model = st.selectbox(
+                "Default Formatter Model",
+                model_keys,
+                index=model_keys.index("o3-mini"),
+                key="idea_formatter_model"
+            )
     
     # Initialize session state for tracking operations
     if "idea_running" not in st.session_state:
@@ -197,7 +215,7 @@ def method_comp(den: Denario) -> None:
     else:
 
         default_planner_index = model_keys.index("gpt-4o")
-        default_plan_reviewer_index = model_keys.index("claude-3.7-sonnet")
+        default_plan_reviewer_index = model_keys.index("gpt-4.1")
         default_method_generator_index = model_keys.index("gpt-4o")
 
         col1, col2 = st.columns(2)
