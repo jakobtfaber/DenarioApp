@@ -169,7 +169,8 @@ def idea_comp(den: Denario) -> None:
                         den.get_idea_fast(llm=llm_model, verbose=True)
                     else:
                         den.get_idea(idea_maker_model=models[idea_maker_model], idea_hater_model=models[idea_hater_model], 
-                                     planner_model=models[planner_model], plan_reviewer_model=models[plan_reviewer_model])
+                                     planner_model=models[planner_model], plan_reviewer_model=models[plan_reviewer_model],
+                                     default_orchestration_model=models[default_orchestration_model], default_formatter_model=models[default_formatter_model])
                     
                     if st.session_state.idea_running:  # Only show success if not stopped
                         st.success("Done!")
@@ -244,6 +245,24 @@ def method_comp(den: Denario) -> None:
                 index=default_method_generator_index,
                 key="method_generator_model"
             )
+
+        col5, col6 = st.columns(2)
+        with col5:
+            st.caption("Default Orchestration Model")
+            default_orchestration_model = st.selectbox(
+                "Default Orchestration Model",
+                model_keys,
+                index=model_keys.index("gpt-4.1"),
+                key="method_orchestration_model"
+            )
+        with col6:
+            st.caption("Default Formatter Model")
+            default_formatter_model = st.selectbox(
+                "Default Formatter Model",
+                model_keys,
+                index=model_keys.index("o3-mini"),
+                key="method_formatter_model"
+            )
     # Initialize session state for tracking operations
     if "method_running" not in st.session_state:
         st.session_state.method_running = False
@@ -289,7 +308,9 @@ def method_comp(den: Denario) -> None:
                     else:
                         den.get_method(planner_model=planner_model, 
                                        plan_reviewer_model=plan_reviewer_model, 
-                                       method_generator_model=method_generator_model)
+                                       method_generator_model=method_generator_model,
+                                       default_orchestration_model=models[default_orchestration_model], 
+                                       default_formatter_model=models[default_formatter_model])
                     
                     if st.session_state.method_running:  # Only show success if not stopped
                         st.success("Done!")
@@ -367,6 +388,24 @@ def results_comp(den: Denario) -> None:
                 key="results_plan_reviewer_model"
             )
 
+        col3, col4 = st.columns(2)
+        with col3:
+            st.caption("Default Orchestration Model")
+            default_orchestration_model = st.selectbox(
+                "Default Orchestration Model",
+                model_keys,
+                index=model_keys.index("gpt-4.1"),
+                key="results_orchestration_model"
+            )
+        with col4:
+            st.caption("Default Formatter Model")
+            default_formatter_model = st.selectbox(
+                "Default Formatter Model",
+                model_keys,
+                index=model_keys.index("o3-mini"),
+                key="results_formatter_model"
+            )
+
         # set max n attempts
         max_n_attempts = st.number_input("Max number of code execution attempts", min_value=1, max_value=10, value=6)
 
@@ -420,7 +459,9 @@ def results_comp(den: Denario) -> None:
                                     planner_model=models[planner_model],
                                     plan_reviewer_model=models[plan_reviewer_model],
                                     max_n_attempts=max_n_attempts,
-                                    max_n_steps=max_n_steps)
+                                    max_n_steps=max_n_steps,
+                                    default_orchestration_model=models[default_orchestration_model],
+                                    default_formatter_model=models[default_formatter_model])
                     
                     if st.session_state.results_running:  # Only show success if not stopped
                         st.success("Done!")
