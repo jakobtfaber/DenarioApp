@@ -26,3 +26,4 @@
 - [x] Add download project button
 - [ ] Show API keys active if .env is uploaded
 - [ ] Add generate button if it fails instead of reloading page
+- [ ] Add port option in denario run cli

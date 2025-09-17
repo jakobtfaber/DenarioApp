@@ -138,9 +138,42 @@ PERPLEXITY_API_KEY="..."
 # Main
 #---
 
-st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing methods, computing results and writing papers.")
+st.write("""
+        AI agents to assist the development of a scientific research process.
+         
+        From getting research ideas, developing methods, computing results and writing papers.
+         """)
 
-st.caption("[Get the source code here](https://github.com/AstroPilot-AI/Denario.git).")
+# Load Font Awesome CSS
+st.markdown(
+    """
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    """,
+    unsafe_allow_html=True
+)
+
+# Icons
+st.markdown(
+    """
+    <div style="text-align: left; margin-top: 0px; margin-bottom: 20px; font-size: 16px;">
+        <a href="https://astropilot-ai.github.io/DenarioPaperPage/" target="_blank" style="margin-right: 30px; text-decoration: none; color: inherit;">
+            <i class="fa-solid fa-globe"></i> Project Page
+        </a>
+        <a href="https://denario.readthedocs.io/en/latest/" target="_blank" style="margin-right: 30px; text-decoration: none; color: inherit;">
+            <i class="fa-solid fa-book"></i> Documentation
+        </a>
+        <a href="https://github.com/AstroPilot-AI/Denario" target="_blank" style="margin-right: 30px; text-decoration: none; color: inherit;">
+            <i class="fa-brands fa-github"></i> Code
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# TODO: add above when paper is ready
+# <a href="https://your-paper-link.com" target="_blank" style="text-decoration: none; color: inherit;">
+#     <i class="fa-solid fa-file-alt"></i> Paper
+# </a>
 
 tab_descr, tab_idea, tab_method, tab_restults, tab_paper,  tab_check_idea, tab_keywords,= st.tabs([
     "**Description**", 
