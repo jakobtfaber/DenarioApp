@@ -1,0 +1,5 @@
+# Binary-only pins to avoid source builds in container
+pyarrow==15.0.2
+numpy==2.3.3
+pandas==2.2.3
+

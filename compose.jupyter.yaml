@@ -1,15 +1,19 @@
 services:
-  app:
-    build: .
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyter
     ports:
-      - 8501:8501
+      - 8512:8888
     volumes:
-      - ./project_app:/app/project_app
-      - ./data:/app/data
-      - ./.env:/app/.env
+      - ./notebooks:/home/user/app/notebooks
+      - ./project_app:/home/user/app/project_app
+      - ./data:/home/user/app/data
+      - ./.env:/home/user/app/.env
       # Optional: mount local Denario source for development (only if available)
       # Uncomment the line below if you want to use local Denario development version
-      # - /data/cmbagents/Denario:/denario:ro
+      # - /data/cmbagents/Denario:/home/user/denario:ro
     environment:
+      - JUPYTER_ENABLE_LAB=yes
       # Set to '1' to use local Denario mount if available, '0' to use PyPI version
       - USE_LOCAL_DENARIO=${USE_LOCAL_DENARIO:-0}

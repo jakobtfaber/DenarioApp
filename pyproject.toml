@@ -7,5 +7,5 @@ requires-python = ">=3.12"
 dependencies = [
     "streamlit",
     "streamlit-pdf-viewer>=0.0.23",
-    "denario",
+    "denario @ file:///data/cmbagents/Denario",
 ]
