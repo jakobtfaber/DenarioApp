@@ -15,9 +15,18 @@ def description_comp(den: Denario) -> None:
 
     st.header("Data description")
 
+    # Load current data description if it exists
+    current_description = ""
+    try:
+        with open(den.project_dir + "/input_files/data_description.md", 'r', encoding='utf-8') as f:
+            current_description = f.read()
+    except FileNotFoundError:
+        pass
+
     data_descr = st.text_area(
         "Describe the data and tools to be used in the project. You may also include information about the computing resources required.",
         placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv using sklearn and pandas. This data includes time-series measurements from a particle detector.",
+        value=current_description,
         key="data_descr",
         height=100
     )
@@ -31,6 +40,74 @@ def description_comp(den: Denario) -> None:
     if data_descr:
 
         den.set_data_description(data_descr)
+
+    # Add option to enhance data description
+    with st.expander("Enhance Data Description Options"):
+        st.caption("Use this option if the description contains arxiv urls.")
+        
+        model_keys = list(models.keys())
+        
+        # Get default model indices
+        default_summarizer_index = model_keys.index("gpt-4.1") if "gpt-4.1" in model_keys else 0
+        default_formatter_index = model_keys.index("o3-mini") if "o3-mini" in model_keys else 0
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.caption("Summarizer Model: Used to summarize downloaded papers")
+            summarizer_model = st.selectbox(
+                "Summarizer Model",
+                model_keys,
+                index=default_summarizer_index,
+                key="enhance_summarizer_model"
+            )
+        with col2:
+            st.caption("Summarizer Response Formatter Model: Used to format summarizer responses")
+            formatter_model = st.selectbox(
+                "Summarizer Response Formatter Model",
+                model_keys,
+                index=default_formatter_index,
+                key="enhance_formatter_model"
+            )
+        
+        enhance_button = st.button("Enhance Data Description", type="secondary", key="enhance_data_desc")
+
+    if enhance_button:
+        # Check if data description exists before attempting enhancement
+        try:
+            with open(den.project_dir + "/input_files/data_description.md", 'r') as f:
+                current_description = f.read()
+            if not current_description.strip():
+                st.warning("No data description found. Please enter a data description above before enhancing it.")
+                return
+        except FileNotFoundError:
+            st.warning("No data description found. Please enter a data description above before enhancing it.")
+            return
+        
+        with st.spinner("Enhancing data description..."):
+            try:
+                # Try with model parameters first
+                try:
+                    den.enhance_data_description(
+                        summarizer_model=summarizer_model,
+                        summarizer_response_formatter_model=formatter_model
+                    )
+                except TypeError as e:
+                    if "unexpected keyword argument" in str(e):
+                        # Fallback to method without model parameters (older version)
+                        st.warning("Using enhanced data description without model selection (please restart the app to enable model selection)")
+                        den.enhance_data_description()
+                    else:
+                        raise e
+                
+                st.success("Data description enhanced successfully!")
+                # Clear the text area by updating session state
+                if "data_descr" in st.session_state:
+                    del st.session_state["data_descr"]
+                st.rerun()
+            except ValueError as e:
+                st.error(f"Error: {str(e)}")
+            except Exception as e:
+                st.error(f"Error enhancing data description: {str(e)}")
 
     st.markdown("### Current data description")
 
