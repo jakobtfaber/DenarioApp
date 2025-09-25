@@ -1,0 +1,12 @@
+{
+  "bundles": {
+    "denarioapp-429": {
+      "name": "denarioapp",
+      "created": "2025-09-17T22:58:14.179Z",
+      "lastUsed": "2025-09-17T22:58:14.179Z",
+      "tags": [],
+      "files": [],
+      "configPath": ".repomix/config/denarioapp-repomix.config.json"
+    }
+  }
+}

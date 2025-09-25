@@ -6,6 +6,7 @@ import importlib.util
 from typing import Dict, Any, List
 from urllib.request import urlopen
 from urllib.error import URLError
+import subprocess
 
 
 def _load_env_file(path: str) -> None:
@@ -80,6 +81,7 @@ def run_checks() -> Dict[str, Any]:
         },
         "imports": {},
         "network": {},
+        "matlab": {},
         "summary": {"errors": []},
     }
 
@@ -149,6 +151,12 @@ def run_checks() -> Dict[str, Any]:
         if status != "ok":
             results["summary"]["errors"].append(f"missing module: {mod}")
 
+    # MATLAB docker probe (optional)
+    try:
+        results["matlab"] = _probe_matlab_docker()
+    except Exception:  # pragma: no cover
+        results["matlab"] = {"enabled": False}
+
     # Optional strict mode to enforce keys as errors
     if os.environ.get(
             "DENARIOAPP_STRICT_KEYS") == "1" and results["keys"]["missing"]:
@@ -158,6 +166,55 @@ def run_checks() -> Dict[str, Any]:
 
     results["summary"]["ok"] = len(results["summary"]["errors"]) == 0
     return results
+
+
+def _probe_matlab_docker() -> Dict[str, Any]:
+    """Probe MATLAB docker container and installed toolboxes.
+
+    Non-fatal: returns dict with status and any info gathered.
+    """
+    info: Dict[str, Any] = {"ok": False}
+    container = os.environ.get("MATLAB_DOCKER_CONTAINER", "matlab_r2025a")
+    backend = os.environ.get("MATLAB_BACKEND", "")
+    if backend != "docker":
+        return {"enabled": False}
+
+    info["enabled"] = True
+    info["container"] = container
+
+    # Quick container liveness check
+    try:
+        ps = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=2,
+        )
+        names = ps.stdout.strip().splitlines()
+        info["running"] = container in names
+        if not info["running"]:
+            return info
+    except Exception:
+        info["error"] = "docker not available"
+        return info
+
+    # Prefer single JSON report from capability_report.m
+    try:
+        rep = subprocess.run([
+            'docker','exec',container,'matlab','-batch','capability_report'
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=20)
+        if rep.returncode == 0 and rep.stdout.strip().startswith('{'):
+            info['capabilities'] = json.loads(rep.stdout.strip())
+            info['ok'] = True
+            return info
+        else:
+            info['stderr'] = rep.stderr.strip()
+    except Exception as e:
+        info['error'] = str(e)
+    info['ok'] = True
+
+    return info
 
 
 def main() -> None:

@@ -1,0 +1,162 @@
+{
+  "queryresult": {
+    "success": true,
+    "error": false,
+    "numpods": 4,
+    "datatypes": "",
+    "parsetiming": 0.314,
+    "parsetimedout": false,
+    "id": "KcuJEkDVUCA=6:eJxTTMoPSmNkYGAoZgESHvk5KWlMIB4nkPDMK0lNL0osSYUIsQKJgPzy1KJikPqKTJBgGjNMq09mcQlUAkgwZIKYAFWJELA=",
+    "kernelId": "385",
+    "processId": 3740392,
+    "version": "2.6",
+    "inputstring": "integrate x^2 from 0 to 1",
+    "sbsallowed": false,
+    "parentId": "354cf264-6bbf-46cd-abfe-4f8bb88ee5b2",
+    "requestId": "354cf264-6bbf-46cd-abfe-4f8bb88ee5b2",
+    "pods": [
+      {
+        "title": "Definite integral",
+        "scanner": "Integral",
+        "id": "Input",
+        "position": 10,
+        "error": false,
+        "numsubpods": 1,
+        "primary": true,
+        "subpods": [
+          {
+            "title": "",
+            "img": {
+              "src": "https://public5c.wolframalpha.com/files/GIF_15jevyd3gtk.gif",
+              "alt": "integral_0^1 x^2 dx = 1/3\u22480.33333",
+              "title": "integral_0^1 x^2 dx = 1/3\u22480.33333",
+              "width": 161,
+              "height": 39,
+              "type": "Default",
+              "themes": "1,2,3,4,5,6,7,8,9,10,11,12",
+              "colorinvertable": true,
+              "contenttype": "image/gif"
+            },
+            "plaintext": "integral_0^1 x^2 dx = 1/3\u22480.33333",
+            "mathml": "<math xmlns='http://www.w3.org/1998/Math/MathML'\n    mathematica:form='StandardForm'\n    xmlns:mathematica='http://www.wolfram.com/XML/'>\n <mrow>\n  <mrow>\n   <msubsup>\n    <mo>&#8747;</mo>\n    <mn>0</mn>\n    <mn>1</mn>\n   </msubsup>\n   <mrow>\n    <msup>\n     <mi>x</mi>\n     <mn>2</mn>\n    </msup>\n    <mo>&#8290;</mo>\n    <mrow>\n     <mi>d</mi>\n     <mo>&#8290;</mo>\n     <mi>x</mi>\n    </mrow>\n   </mrow>\n  </mrow>\n  <mtext> = </mtext>\n  <mfrac>\n   <mn>1</mn>\n   <mn>3</mn>\n  </mfrac>\n  <mo>&#8776;</mo>\n  <mn>0.33333</mn>\n </mrow>\n</math>"
+          }
+        ],
+        "expressiontypes": {
+          "name": "Default"
+        },
+        "states": [
+          {
+            "name": "More digits",
+            "input": "Input__More digits"
+          }
+        ]
+      },
+      {
+        "title": "Visual representation of the integral",
+        "scanner": "Integral",
+        "id": "VisualRepresentationOfTheIntegral",
+        "position": 100,
+        "error": false,
+        "numsubpods": 1,
+        "subpods": [
+          {
+            "title": "",
+            "img": {
+              "src": "https://public5c.wolframalpha.com/files/GIF_15jf9inl1jn.gif",
+              "alt": "Visual representation of the integral",
+              "title": "",
+              "width": 200,
+              "height": 144,
+              "type": "2DMathPlotWithSignedArea",
+              "themes": "1,2,3,4,5,6,7,8,9,10,11,12",
+              "colorinvertable": true,
+              "contenttype": "image/gif"
+            },
+            "plaintext": ""
+          }
+        ],
+        "expressiontypes": {
+          "name": "Default"
+        }
+      },
+      {
+        "title": "Riemann sums",
+        "scanner": "Integral",
+        "id": "RiemannSums",
+        "position": 200,
+        "error": false,
+        "numsubpods": 1,
+        "subpods": [
+          {
+            "title": "",
+            "img": {
+              "src": "https://public5c.wolframalpha.com/files/GIF_15jf39lgcxo.gif",
+              "alt": "left sum | ((n - 1) (2 n - 1))/(6 n^2) = 1/3 - 1/(2 n) + O((1/n)^2)\n(assuming subintervals of equal length)",
+              "title": "left sum | ((n - 1) (2 n - 1))/(6 n^2) = 1/3 - 1/(2 n) + O((1/n)^2)\n(assuming subintervals of equal length)",
+              "width": 297,
+              "height": 74,
+              "type": "Grid",
+              "themes": "1,2,3,4,5,6,7,8,9,10,11,12",
+              "colorinvertable": true,
+              "contenttype": "image/gif"
+            },
+            "plaintext": "left sum | ((n - 1) (2 n - 1))/(6 n^2) = 1/3 - 1/(2 n) + O((1/n)^2)\n(assuming subintervals of equal length)"
+          }
+        ],
+        "expressiontypes": {
+          "name": "Grid"
+        },
+        "states": [
+          {
+            "name": "More cases",
+            "input": "RiemannSums__More cases"
+          }
+        ]
+      },
+      {
+        "title": "Indefinite integral",
+        "scanner": "Integral",
+        "id": "IndefiniteIntegral",
+        "position": 1810,
+        "error": false,
+        "numsubpods": 1,
+        "subpods": [
+          {
+            "title": "",
+            "img": {
+              "src": "https://public5c.wolframalpha.com/files/GIF_15jf05hbfex.gif",
+              "alt": "integral x^2 dx = x^3/3 + constant",
+              "title": "integral x^2 dx = x^3/3 + constant",
+              "width": 155,
+              "height": 40,
+              "type": "Default",
+              "themes": "1,2,3,4,5,6,7,8,9,10,11,12",
+              "colorinvertable": true,
+              "contenttype": "image/gif"
+            },
+            "plaintext": "integral x^2 dx = x^3/3 + constant",
+            "mathml": "<math xmlns='http://www.w3.org/1998/Math/MathML'\n    mathematica:form='StandardForm'\n    xmlns:mathematica='http://www.wolfram.com/XML/'>\n <mrow>\n  <mrow>\n   <mo>&#8747;</mo>\n   <mrow>\n    <msup>\n     <mi>x</mi>\n     <mn>2</mn>\n    </msup>\n    <mo>&#8290;</mo>\n    <mrow>\n     <mi>d</mi>\n     <mo>&#8290;</mo>\n     <mi>x</mi>\n    </mrow>\n   </mrow>\n  </mrow>\n  <mtext> = </mtext>\n  <mrow>\n   <mfrac>\n    <msup>\n     <mi>x</mi>\n     <mn>3</mn>\n    </msup>\n    <mn>3</mn>\n   </mfrac>\n   <mo>+</mo>\n   <mi>constant</mi>\n  </mrow>\n </mrow>\n</math>"
+          }
+        ],
+        "expressiontypes": {
+          "name": "Default"
+        }
+      }
+    ],
+    "relatedqueries": {
+      "count": 5,
+      "timing": 1.2917459999999998,
+      "relatedquery": [
+        "d^3/dx^3 x^2",
+        "cos(G a u s s)  sin(b i r t h d a y)  tan(t o d a y)",
+        "series of x^2 at x=0",
+        "limit of x^2 as x -> +infinity",
+        "series of int x^2 dx"
+      ]
+    },
+    "timing": 1.725,
+    "timedout": "",
+    "timedoutpods": "",
+    "recalculate": "https://gateway.wolframalpha.com/calculate/recalc?id=NWM6NGY0ZjQ4NDMtYmFjMi00OGYxLWI3MzUtMDE2MjdlMTdlY2Vh"
+  }
+}

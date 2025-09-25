@@ -22,8 +22,13 @@ from streamlit_pdf_viewer import pdf_viewer
 from denario import Denario, Journal
 from denario import models
 from denario.utils import WolframAlphaClient
-from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
-from constants import RAG_PROVIDERS
+try:
+    from .utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
+    from .constants import RAG_PROVIDERS
+except Exception:
+    # Fallback for script-mode import
+    from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
+    from constants import RAG_PROVIDERS
 
 # ---
 # Components
@@ -1539,23 +1544,37 @@ def keywords_comp(den: Denario) -> None:
                 if (
                     st.session_state.keywords_running
                 ):  # Only show success if not stopped
-                    if (
-                        hasattr(den.research, "keywords")
-                        and den.research.keywords
-                    ):
+                    generated_kw = st.session_state.get('generated_keywords')
+                    if ((hasattr(den.research, "keywords")
+                         and den.research.keywords) or generated_kw):
+                        # Persist latest generated keywords in session to
+                        # survive reruns
+                        if hasattr(
+                                den.research,
+                                "keywords") and den.research.keywords:
+                            st.session_state['generated_keywords'] = den.research.keywords
+                            generated_kw = den.research.keywords
+
                         st.success("Keywords generated!")
                         st.write("### Generated Keywords")
-                        for keyword, url in den.research.keywords.items():
+                        for keyword, url in (generated_kw or {}).items():
                             st.markdown(f"- [{keyword}]({url})")
 
                         # --- Simple HITL review: allow edit/accept ---
                         st.markdown("---")
                         st.write("Review and edit keywords (comma-separated).")
+                        default_keywords = st.session_state.get(
+                            "accepted_keywords",
+                            ", ".join(
+                                list(
+                                    (st.session_state.get('generated_keywords') or getattr(
+                                        den.research,
+                                        'keywords',
+                                        {}) or {}).keys())),
+                        )
                         editable_keywords = st.text_area(
                             "Edit keywords",
-                            value=", ".join(
-                                list(den.research.keywords.keys())
-                            ),
+                            value=default_keywords,
                             height=120,
                             key="editable_keywords_area",
                         )
@@ -1572,18 +1591,69 @@ def keywords_comp(den: Denario) -> None:
                                     for k in editable_keywords.split(",")
                                     if k.strip()
                                 ]
-                                out_dir = Path(den.project_dir) / "input_files"
-                                out_dir.mkdir(parents=True, exist_ok=True)
-                                out_path = out_dir / "keywords_selected.md"
-                                with open(out_path, "w") as f:
-                                    f.write(
-                                        "Keywords: "
-                                        + ", ".join(edited_list)
-                                        + "\n"
+                                try:
+                                    out_dir = Path(
+                                        den.project_dir) / "input_files"
+                                    out_dir.mkdir(parents=True, exist_ok=True)
+                                    out_path = out_dir / "keywords_selected.md"
+                                    with open(out_path, "w", encoding="utf-8") as f:
+                                        f.write(
+                                            "Keywords: "
+                                            + ", ".join(edited_list)
+                                            + "\n"
+                                        )
+
+                                    # Also persist to paper temp so writer reads
+                                    # immediately
+                                    paper_temp_dir = Path(
+                                        den.project_dir) / "paper" / "temp"
+                                    paper_temp_dir.mkdir(
+                                        parents=True, exist_ok=True)
+                                    keywords_tex = paper_temp_dir / "Keywords.tex"
+                                    # Write a minimal LaTeX document so the paper reader
+                                    # can extract text between
+                                    # \begin{document}..\end{document}
+                                    _kw = ", ".join(edited_list)
+                                    _latex_doc = (
+                                        "\\documentclass{article}\n"
+                                        "\\usepackage{amsmath}\n"
+                                        "\\begin{document}\n"
+                                        f"{_kw}\n"
+                                        "\\end{document}\n"
                                     )
-                                st.success(
-                                    f"Saved reviewed keywords to {out_path}"
-                                )
+                                    with open(keywords_tex, "w", encoding="utf-8") as f:
+                                        f.write(_latex_doc)
+
+                                    md_ok = out_path.exists() and out_path.stat().st_size > 0
+                                    tex_ok = keywords_tex.exists() and keywords_tex.stat().st_size > 0
+
+                                    # Keep accepted keywords visible in the UI
+                                    st.session_state["accepted_keywords"] = ", ".join(
+                                        edited_list)
+
+                                    if md_ok and tex_ok:
+                                        st.success(
+                                            f"Saved reviewed keywords to {out_path} and {keywords_tex}")
+                                        # Preview saved keywords from
+                                        # paper/temp/Keywords.tex
+                                        try:
+                                            saved_kw = keywords_tex.read_text(
+                                                encoding="utf-8"
+                                            ).strip()
+                                            st.caption(
+                                                "Saved Keywords (paper/temp/Keywords.tex):"
+                                            )
+                                            st.code(saved_kw, language="latex")
+                                        except Exception as preview_err:
+                                            st.info(
+                                                f"Keywords saved, but preview unavailable: {preview_err}")
+                                    else:
+                                        st.error(
+                                            f"Keywords not fully saved. Exists: md={md_ok}, tex={tex_ok}.")
+                                except Exception as save_err:
+                                    st.error(
+                                        f"Failed to save keywords: {
+                                            type(save_err).__name__}: {save_err}")
                     else:
                         st.error(
                             "No keywords were generated. Please try again with different text."
@@ -1592,6 +1662,93 @@ def keywords_comp(den: Denario) -> None:
                 st.error(f"Error: {str(e)}")
             finally:
                 st.session_state.keywords_running = False
+
+    # --- Persistent review/editor: always render outside generation branch ---
+    try:
+        project_dir = Path(den.project_dir)
+        md_path = project_dir / "input_files" / "keywords_selected.md"
+
+        # Seed editable text from, in order of priority:
+        # 1) accepted keywords from session
+        # 2) generated keywords from session
+        # 3) existing keywords_selected.md on disk
+        # 4) empty
+        seed_csv = st.session_state.get("accepted_keywords", "")
+        if not seed_csv:
+            gen_kw = st.session_state.get('generated_keywords') or {}
+            if isinstance(gen_kw, dict) and gen_kw:
+                seed_csv = ", ".join(list(gen_kw.keys()))
+        if not seed_csv and md_path.exists():
+            try:
+                content = md_path.read_text(encoding='utf-8')
+                seed_csv = content.split(
+                    ":", 1)[1].strip() if ":" in content else content.strip()
+            except Exception:
+                seed_csv = ""
+
+        # Only render the review UI if we have something to show/edit
+        if seed_csv:
+            st.markdown("---")
+            st.write("Review and edit keywords (comma-separated).")
+            with st.form("keywords_review_form"):
+                edited_csv = st.text_area(
+                    "Edit keywords",
+                    value=seed_csv,
+                    height=120,
+                    key="editable_keywords_review",
+                )
+                submitted = st.form_submit_button("Accept keywords")
+                if submitted:
+                    edited_list = [k.strip()
+                                   for k in edited_csv.split(",") if k.strip()]
+                    try:
+                        out_dir = project_dir / "input_files"
+                        out_dir.mkdir(parents=True, exist_ok=True)
+                        out_path = out_dir / "keywords_selected.md"
+                        with open(out_path, "w", encoding="utf-8") as f:
+                            f.write(
+                                "Keywords: " + ", ".join(edited_list) + "\n")
+
+                        paper_temp_dir = project_dir / "paper" / "temp"
+                        paper_temp_dir.mkdir(parents=True, exist_ok=True)
+                        keywords_tex = paper_temp_dir / "Keywords.tex"
+                        _kw = ", ".join(edited_list)
+                        _latex_doc = (
+                            "\\documentclass{article}\n"
+                            "\\usepackage{amsmath}\n"
+                            "\\begin{document}\n"
+                            f"{_kw}\n"
+                            "\\end{document}\n"
+                        )
+                        with open(keywords_tex, "w", encoding="utf-8") as f:
+                            f.write(_latex_doc)
+
+                        md_ok = out_path.exists() and out_path.stat().st_size > 0
+                        tex_ok = keywords_tex.exists() and keywords_tex.stat().st_size > 0
+                        st.session_state["accepted_keywords"] = ", ".join(
+                            edited_list)
+
+                        if md_ok and tex_ok:
+                            st.success(
+                                f"Saved reviewed keywords to {out_path} and {keywords_tex}")
+                            try:
+                                saved_kw = keywords_tex.read_text(
+                                    encoding="utf-8").strip()
+                                st.caption(
+                                    "Saved Keywords (paper/temp/Keywords.tex):")
+                                st.code(saved_kw, language='latex')
+                            except Exception as preview_err:
+                                st.info(
+                                    f"Keywords saved, but preview unavailable: {preview_err}")
+                        else:
+                            st.error(
+                                f"Keywords not fully saved. Exists: md={md_ok}, tex={tex_ok}.")
+                    except Exception as save_err:
+                        st.error(
+                            f"Failed to save keywords: {
+                                type(save_err).__name__}: {save_err}")
+    except Exception:
+        pass
 
 
 def wolfram_hitl_review_comp():

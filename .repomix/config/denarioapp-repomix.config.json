@@ -1,0 +1,46 @@
+{
+  "output": {
+    "filePath": "/data/cmbagents/DenarioApp/repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "headerText": "",
+    "instructionFilePath": "",
+    "fileSummary": true,
+    "directoryStructure": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": true,
+    "includeEmptyDirectories": false,
+    "compress": false
+  },
+  "include": [
+    "data/**",
+    "notebooks/**",
+    "src/**",
+    "tests/**",
+    "compose.jupyter.yaml",
+    "compose.yaml",
+    "constraints.txt",
+    "Dockerfile",
+    "Dockerfile.jupyter",
+    "*.sh",
+    "*.md",
+    "*.py",
+    "*.ipynb",
+    "*.log"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  },
+  "cwd": "/data/cmbagents/DenarioApp"
+}

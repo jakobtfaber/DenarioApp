@@ -49,4 +49,6 @@ fi
 
 wait ${PID}
 
+export PYTHONPATH=/data/cmbagents/Denario:/data/cmbagents/DenarioApp/src:$PYTHONPATH
+
 

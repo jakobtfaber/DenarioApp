@@ -67,4 +67,4 @@ HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
 # Use entrypoint script to handle optional local Denario installation
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["streamlit", "run", "src/denario_app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "src/denario_app/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless", "true"]

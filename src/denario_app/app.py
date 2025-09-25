@@ -1,8 +1,17 @@
 import os
 import sys
-from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
-from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp, wolfram_hitl_review_comp
-from constants import PROJECT_DIR, LLMs
+try:
+    from .utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
+    from .components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp, wolfram_hitl_review_comp
+    from .constants import PROJECT_DIR, LLMs
+except Exception:
+    # Fallback when executed as a plain script (no package context)
+    _HERE = os.path.dirname(__file__)
+    if _HERE not in sys.path:
+        sys.path.insert(0, _HERE)
+    from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
+    from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp, wolfram_hitl_review_comp
+    from constants import PROJECT_DIR, LLMs
 try:
     from .preflight import run_checks  # type: ignore
 except Exception:

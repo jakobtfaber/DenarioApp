@@ -1,0 +1,2896 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+The content has been processed where comments have been removed, empty lines have been removed, line numbers have been added.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Code comments have been removed from supported file types
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+denario_app/
+  app.py
+  arxiv_rag.py
+  cli.py
+  components.py
+  constants.py
+  graphrag.py
+  preflight.py
+  rag_adapter.py
+  utils.py
+denario_app.egg-info/
+  dependency_links.txt
+  PKG-INFO
+  requires.txt
+  SOURCES.txt
+  top_level.txt
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="denario_app/app.py">
+  1: import os
+  2: import sys
+  3: try:
+  4:     from .utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
+  5:     from .components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp, wolfram_hitl_review_comp
+  6:     from .constants import PROJECT_DIR, LLMs
+  7: except Exception:
+  8:     _HERE = os.path.dirname(__file__)
+  9:     if _HERE not in sys.path:
+ 10:         sys.path.insert(0, _HERE)
+ 11:     from utils import extract_api_keys, get_project_dir, set_api_keys, create_zip_in_memory, delete_old_folders
+ 12:     from components import description_comp, idea_comp, method_comp, results_comp, paper_comp, keywords_comp, check_idea_comp, wolfram_hitl_review_comp
+ 13:     from constants import PROJECT_DIR, LLMs
+ 14: try:
+ 15:     from .preflight import run_checks
+ 16: except Exception:
+ 17:     import importlib.util as _ilu
+ 18:     _pf_path = os.path.join(os.path.dirname(__file__), 'preflight.py')
+ 19:     _spec = _ilu.spec_from_file_location('denario_app_preflight', _pf_path)
+ 20:     assert _spec and _spec.loader
+ 21:     _mod = _ilu.module_from_spec(_spec)
+ 22:     _spec.loader.exec_module(_mod)
+ 23:     run_checks = getattr(_mod, 'run_checks')
+ 24: import argparse
+ 25: import streamlit as st
+ 26: DENARIO_SRC = '/data/cmbagents/Denario'
+ 27: try:
+ 28:     from denario import Denario
+ 29: except ModuleNotFoundError:
+ 30:     sys.path.insert(0, DENARIO_SRC)
+ 31:     try:
+ 32:         from denario import Denario
+ 33:     except ModuleNotFoundError:
+ 34:         import importlib.util
+ 35:         import types
+ 36:         init_path = os.path.join(DENARIO_SRC, 'denario', '__init__.py')
+ 37:         spec = importlib.util.spec_from_file_location('denario', init_path)
+ 38:         mod = importlib.util.module_from_spec(spec)
+ 39:         assert spec is not None and spec.loader is not None
+ 40:         spec.loader.exec_module(mod)
+ 41:         sys.modules['denario'] = mod
+ 42:         from denario import Denario
+ 43: _pf = run_checks()
+ 44: if not _pf['summary']['ok']:
+ 45:     st.error('Preflight failed. See terminal logs for details.')
+ 46:     st.json(_pf)
+ 47:     st.stop()
+ 48: denarioimg = 'https://avatars.githubusercontent.com/u/206478071?s=400&u=b2da27eb19fb77adbc7b12b43da91fbc7309fb6f&v=4'
+ 49: st.set_page_config(
+ 50:     page_title="Denario",
+ 51:     layout="wide",
+ 52:     initial_sidebar_state="auto",
+ 53:     menu_items=None
+ 54: )
+ 55: st.session_state["LLM_API_KEYS"] = {}
+ 56: st.title('Denario')
+ 57: _project_dir = get_project_dir()
+ 58: den = Denario(project_dir=_project_dir)
+ 59: st.markdown("""
+ 60:     <style>
+ 61:     .log-box {
+ 62:         background-color: #111827;
+ 63:         color: #d1d5db;
+ 64:         font-family: monospace;
+ 65:         padding: 1em;
+ 66:         border-radius: 8px;
+ 67:         max-height: 300px;
+ 68:         overflow-y: auto;
+ 69:         border: 1px solid #4b5563;
+ 70:         white-space: pre-wrap;
+ 71:         resize: vertical;
+ 72:         min-height: 100px;
+ 73:         max-height: 700px;
+ 74:     }
+ 75:     </style>
+ 76: """, unsafe_allow_html=True)
+ 77: with st.sidebar:
+ 78:     st.header("API keys")
+ 79:     st.markdown(
+ 80:         "*Input OpenAI, Anthropic, Gemini and Perplexity API keys below. See [here](https://denario.readthedocs.io/en/latest/apikeys/) for more information.*")
+ 81:     with st.expander("Set API keys"):
+ 82:         for llm in LLMs:
+ 83:             api_key = st.text_input(
+ 84:                 f"{llm} API key:",
+ 85:                 type="password",
+ 86:                 key=f"{llm}_api_key_input"
+ 87:             )
+ 88:             # If the user enters a key, save it and rerun to refresh the
+ 89:             # interface
+ 90:             if api_key:
+ 91:                 st.session_state["LLM_API_KEYS"][llm] = api_key
+ 92:                 set_api_keys(den.keys, api_key, llm)
+ 93:             # Check session state
+ 94:             has_key = st.session_state["LLM_API_KEYS"].get(llm)
+ 95:             # # Display status after the key is saved
+ 96:             # if has_key:
+ 97:             #     st.markdown(f"<small style='color:green;'> ✅: {llm} API key set</small>",unsafe_allow_html=True)
+ 98:             # else:
+ 99:             #     st.markdown(f"<small style='color:red;'>❌: No {llm} API key</small>", unsafe_allow_html=True)
+100:         st.markdown(
+101: )
+102:         uploaded_dotenv = st.file_uploader(
+103:             "Upload the .env file", accept_multiple_files=False)
+104:         if uploaded_dotenv:
+105:             keys = extract_api_keys(uploaded_dotenv)
+106:             for key, value in keys.items():
+107:                 st.session_state["LLM_API_KEYS"][key] = value
+108:                 den.keys[key] = value
+109:     st.header("Upload data")
+110:     uploaded_data = st.file_uploader(
+111:         "Upload the data files",
+112:         accept_multiple_files=True)
+113:     if uploaded_data:
+114:         os.makedirs(f"{den.project_dir}/data/", exist_ok=True)
+115:         for uploaded_file in uploaded_data:
+116:             with open(f"{den.project_dir}/data/{uploaded_file.name}", "wb") as f:
+117:                 f.write(uploaded_file.getbuffer())
+118:         st.success("Files uploaded successfully!")
+119:     st.header("Download project")
+120:     project_zip = create_zip_in_memory(den.project_dir)
+121:     st.download_button(
+122:         label="Download all project files",
+123:         data=project_zip,
+124:         file_name="project.zip",
+125:         mime="application/zip",
+126:         icon=":material/download:",
+127:     )
+128: st.write("AI agents to assist the development of a scientific research process. From getting research ideas, developing methods, computing results and writing papers.")
+129: st.caption(
+130:     "[Get the source code here](https://github.com/AstroPilot-AI/Denario.git).")
+131: tab_descr, tab_idea, tab_method, tab_restults, tab_paper, tab_check_idea, tab_keywords, tab_wolfram = st.tabs([
+132:     "**Description**",
+133:     "**Idea**",
+134:     "**Methods**",
+135:     "**Results**",
+136:     "**Paper**",
+137:     "Check idea",
+138:     "Keywords",
+139:     "Wolfram Alpha"
+140: ])
+141: with tab_descr:
+142:     description_comp(den)
+143: with tab_idea:
+144:     idea_comp(den)
+145: with tab_method:
+146:     method_comp(den)
+147: with tab_restults:
+148:     results_comp(den)
+149: with tab_paper:
+150:     paper_comp(den)
+151: with tab_check_idea:
+152:     check_idea_comp(den)
+153: with tab_keywords:
+154:     keywords_comp(den)
+155: with tab_wolfram:
+156:     wolfram_hitl_review_comp()
+</file>
+
+<file path="denario_app/arxiv_rag.py">
+  1: import os
+  2: import json
+  3: import logging
+  4: import requests
+  5: import xml.etree.ElementTree as ET
+  6: from typing import List, Dict, Any, Optional
+  7: from datetime import datetime, timedelta
+  8: import re
+  9: logger = logging.getLogger(__name__)
+ 10: class ArxivRetriever:
+ 11:     def __init__(self, max_results: int = 10):
+ 12:         self.base_url = "http://export.arxiv.org/api/query"
+ 13:         self.max_results = max_results
+ 14:     def _parse_arxiv_entry(self, entry) -> Dict[str, Any]:
+ 15:         title = entry.find('{http://www.w3.org/2005/Atom}title').text.strip()
+ 16:         summary = entry.find(
+ 17:             '{http://www.w3.org/2005/Atom}summary').text.strip()
+ 18:         published = entry.find('{http://www.w3.org/2005/Atom}published').text
+ 19:         updated = entry.find('{http://www.w3.org/2005/Atom}updated').text
+ 20:         authors = []
+ 21:         for author in entry.findall('{http://www.w3.org/2005/Atom}author'):
+ 22:             name = author.find('{http://www.w3.org/2005/Atom}name').text
+ 23:             authors.append(name)
+ 24:         arxiv_id = None
+ 25:         pdf_url = None
+ 26:         abstract_url = None
+ 27:         for link in entry.findall('{http://www.w3.org/2005/Atom}link'):
+ 28:             if link.get('type') == 'application/pdf':
+ 29:                 pdf_url = link.get('href')
+ 30:             elif link.get('type') == 'text/html':
+ 31:                 abstract_url = link.get('href')
+ 32:         if abstract_url:
+ 33:             match = re.search(r'abs/(\d+\.\d+(?:v\d+)?)', abstract_url)
+ 34:             if match:
+ 35:                 arxiv_id = match.group(1)
+ 36:         categories = []
+ 37:         for category in entry.findall('{http://www.w3.org/2005/Atom}category'):
+ 38:             term = category.get('term')
+ 39:             if term:
+ 40:                 categories.append(term)
+ 41:         doi = None
+ 42:         if arxiv_id:
+ 43:             doi = f"10.48550/arXiv.{arxiv_id}"
+ 44:         return {
+ 45:             "title": title,
+ 46:             "authors": authors,
+ 47:             "summary": summary,
+ 48:             "published": published,
+ 49:             "updated": updated,
+ 50:             "arxiv_id": arxiv_id,
+ 51:             "pdf_url": pdf_url,
+ 52:             "abstract_url": abstract_url,
+ 53:             "doi": doi,
+ 54:             "categories": categories,
+ 55:             "type": "arxiv_paper"
+ 56:         }
+ 57:     def search(self, query: str,
+ 58:                max_results: Optional[int] = None) -> List[Dict[str, Any]]:
+ 59:         if max_results is None:
+ 60:             max_results = self.max_results
+ 61:         # Construct search parameters
+ 62:         params = {
+ 63:             'search_query': query,
+ 64:             'start': 0,
+ 65:             'max_results': max_results,
+ 66:             'sortBy': 'relevance',
+ 67:             'sortOrder': 'descending'
+ 68:         }
+ 69:         try:
+ 70:             logger.info(f"Searching arXiv for: {query}")
+ 71:             response = requests.get(self.base_url, params=params, timeout=30)
+ 72:             response.raise_for_status()
+ 73:             # Parse XML response
+ 74:             root = ET.fromstring(response.content)
+ 75:             # Extract entries
+ 76:             entries = root.findall('{http://www.w3.org/2005/Atom}entry')
+ 77:             results = []
+ 78:             for entry in entries:
+ 79:                 paper = self._parse_arxiv_entry(entry)
+ 80:                 results.append(paper)
+ 81:             logger.info(f"Found {len(results)} papers from arXiv")
+ 82:             return results
+ 83:         except Exception as e:
+ 84:             logger.error(f"arXiv search failed: {e}")
+ 85:             return []
+ 86:     def search_by_category(
+ 87:             self, category: str, max_results: Optional[int] = None) -> List[Dict[str, Any]]:
+ 88:         if max_results is None:
+ 89:             max_results = self.max_results
+ 90:         # Common arXiv categories for cosmology/physics
+ 91:         category_map = {
+ 92:             "cosmology": "astro-ph.CO",
+ 93:             "astrophysics": "astro-ph",
+ 94:             "physics": "physics",
+ 95:             "general relativity": "gr-qc",
+ 96:             "particle physics": "hep-ph",
+ 97:             "quantum field theory": "hep-th"
+ 98:         }
+ 99:         arxiv_category = category_map.get(category.lower(), category)
+100:         query = f"cat:{arxiv_category}"
+101:         return self.search(query, max_results)
+102:     def get_recent_papers(self,
+103:                           category: str = "astro-ph.CO",
+104:                           days: int = 30,
+105:                           max_results: Optional[int] = None) -> List[Dict[str,
+106:                                                                           Any]]:
+107:         if max_results is None:
+108:             max_results = self.max_results
+109:         # Calculate date range
+110:         end_date = datetime.now()
+111:         start_date = end_date - timedelta(days=days)
+112:         # Format dates for arXiv API
+113:         start_str = start_date.strftime("%Y%m%d")
+114:         end_str = end_date.strftime("%Y%m%d")
+115:         query = f"cat:{category} AND submittedDate:[{start_str}0000 TO {end_str}2359]"
+116:         return self.search(query, max_results)
+117:     def format_for_denario(self, papers: List[Dict[str, Any]]) -> str:
+118:         if not papers:
+119:             return "No papers found."
+120:         result = f"Found {len(papers)} relevant papers from arXiv:\n\n"
+121:         for i, paper in enumerate(papers, 1):
+122:             result += f"{i}. {paper['title']}\n"
+123:             result += f"   Authors: {', '.join(paper['authors'][:3])}"
+124:             if len(paper['authors']) > 3:
+125:                 result += f" et al. ({len(paper['authors'])} total)"
+126:             result += "\n"
+127:             if paper['arxiv_id']:
+128:                 result += f"   arXiv ID: {paper['arxiv_id']}\n"
+129:             if paper['doi']:
+130:                 result += f"   DOI: https://doi.org/{paper['doi']}\n"
+131:             if paper['categories']:
+132:                 result += f"   Categories: {', '.join(paper['categories'][:2])}\n"
+133:             if paper['abstract_url']:
+134:                 result += f"   URL: {paper['abstract_url']}\n"
+135:             # Add summary preview
+136:             summary = paper['summary'][:200] + \
+137:                 "..." if len(paper['summary']) > 200 else paper['summary']
+138:             result += f"   Abstract: {summary}\n"
+139:             result += "\n"
+140:         return result
+141: class ArxivRAGRetriever:
+142:     def __init__(self, max_results: int = 5):
+143:         self.retriever = ArxivRetriever(max_results)
+144:     def retrieve(self, query: str,
+145:                  max_results: Optional[int] = None) -> List[Dict[str, Any]]:
+146:         papers = self.retriever.search(query, max_results)
+147:         # Format for DenarioApp
+148:         formatted_results = []
+149:         for paper in papers:
+150:             formatted_results.append({
+151:                 "title": paper["title"],
+152:                 "url": paper["abstract_url"] or f"https://arxiv.org/abs/{paper['arxiv_id']}",
+153:                 "doi": paper["doi"],
+154:                 "content": paper["summary"],
+155:                 "authors": paper["authors"],
+156:                 "arxiv_id": paper["arxiv_id"],
+157:                 "categories": paper["categories"],
+158:                 "published": paper["published"],
+159:                 "type": "arxiv_paper"
+160:             })
+161:         return formatted_results
+162:     def search_by_topic(
+163:             self,
+164:             topic: str,
+165:             max_results: Optional[int] = None) -> str:
+166:         papers = self.retriever.search(topic, max_results)
+167:         return self.retriever.format_for_denario(papers)
+168:     def get_recent_cosmology_papers(
+169:             self,
+170:             days: int = 30,
+171:             max_results: Optional[int] = None) -> str:
+172:         papers = self.retriever.get_recent_papers(
+173:             "astro-ph.CO", days, max_results)
+174:         return self.retriever.format_for_denario(papers)
+175: _arxiv_retriever = None
+176: def get_arxiv_retriever() -> ArxivRAGRetriever:
+177:     global _arxiv_retriever
+178:     if _arxiv_retriever is None:
+179:         _arxiv_retriever = ArxivRAGRetriever()
+180:     return _arxiv_retriever
+</file>
+
+<file path="denario_app/cli.py">
+ 1: import os
+ 2: import sys
+ 3: from pathlib import Path
+ 4: def run():
+ 5:     app_path = Path(__file__).resolve().parent / "app.py"
+ 6:     if not app_path.exists():
+ 7:         app_path = Path(__file__).resolve().parent.parent / "src" / "denario_app" / "app.py"
+ 8:     if not app_path.exists():
+ 9:         print(f"❌ Could not find Streamlit app at {app_path}")
+10:         sys.exit(1)
+11:     cmd = [sys.executable, "-m", "streamlit", "run", str(app_path)]
+12:     os.execv(sys.executable, cmd)
+</file>
+
+<file path="denario_app/components.py">
+   1: from pathlib import Path
+   2: from PIL import Image
+   3: import streamlit as st
+   4: import json
+   5: import os
+   6: from streamlit_pdf_viewer import pdf_viewer
+   7: from denario import Denario, Journal
+   8: from denario import models
+   9: from denario.utils import WolframAlphaClient
+  10: try:
+  11:     from .utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
+  12:     from .constants import RAG_PROVIDERS
+  13: except Exception:
+  14:     from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
+  15:     from constants import RAG_PROVIDERS
+  16: def _get_domain_context(provider: str) -> str:
+  17:     if "Planck" in provider:
+  18:         return """Planck Mission Context:
+  19: - Planck 2018 results: cosmological parameters from CMB temperature and polarization
+  20: - Key datasets: Planck 2018 TT,TE,EE+lowE+lensing+BAO
+  21: - Relevant parameters: H0, Ωm, ΩΛ, ns, As, τ
+  22: - Recent constraints: H0 = 67.4 ± 0.5 km/s/Mpc (Planck 2018)
+  23: - Lensing potential: Planck lensing reconstruction
+  24: - Systematics: foreground contamination, beam uncertainties"""
+  25:     elif "CAMB" in provider:
+  26:         return """CAMB (Code for Anisotropies in the Microwave Background) Context:
+  27: - Boltzmann solver for CMB anisotropies and matter power spectra
+  28: - Key features: scalar, vector, tensor modes; dark energy models
+  29: - Recent updates: CAMB 1.3+ with improved precision
+  30: - Applications: parameter estimation, likelihood analysis
+  31: - Integration: CosmoMC, MontePython, Cobaya
+  32: - Outputs: Cl, P(k), transfer functions"""
+  33:     elif "CLASSY" in provider:
+  34:         return """CLASSY (Cosmic Linear Anisotropy Solving System) Context:
+  35: - Alternative to CAMB for CMB and LSS calculations
+  36: - Features: high precision, modular design, dark energy models
+  37: - Recent work: CLASSY-SZ for Sunyaev-Zel'dovich effects
+  38: - Applications: parameter estimation, model comparison
+  39: - Integration: MontePython, Cobaya
+  40: - Advantages: speed, flexibility, extended models"""
+  41:     else:
+  42:         return "Domain-specific context not available for this provider."
+  43: def _retrieve_with_unified_adapter(
+  44:         provider: str,
+  45:         query: str,
+  46:         max_results: int = 5) -> tuple:
+  47:     try:
+  48:         from .rag_adapter import get_unified_rag_adapter, format_results_for_ui
+  49:         adapter = get_unified_rag_adapter()
+  50:         provider_info = adapter.get_provider_info(provider)
+  51:         results = adapter.retrieve_with_fallback(query, provider, max_results)
+  52:         return results, provider_info, None
+  53:     except Exception as e:
+  54:         return [], {"name": "Unknown", "available": False}, str(e)
+  55: def description_comp(den: Denario) -> None:
+  56:     st.header("Data description")
+  57:     data_descr = st.text_area(
+  58:         "Describe the data and tools to be used in the project. You may also "
+  59:         "include information about the computing resources required.",
+  60:         placeholder="E.g. Analyze the experimental data stored in /path/to/data.csv "
+  61:         "using sklearn and pandas. This data includes time-series measurements "
+  62:         "from a particle detector.",
+  63:         key="data_descr",
+  64:         height=100,
+  65:     )
+  66:     uploaded_file = st.file_uploader(
+  67:         "Alternatively, upload a file with the data description in markdown "
+  68:         "format.",
+  69:         accept_multiple_files=False,
+  70:     )
+  71:     if uploaded_file:
+  72:         content = uploaded_file.read().decode("utf-8")
+  73:         den.set_data_description(content)
+  74:     if data_descr:
+  75:         den.set_data_description(data_descr)
+  76:     st.markdown("### Current data description")
+  77:     try:
+  78:         show_markdown_file(
+  79:             den.project_dir + "/input_files/data_description.md",
+  80:             label="data description",
+  81:         )
+  82:     except FileNotFoundError:
+  83:         st.write("Data description not set.")
+  84: def idea_comp(den: Denario) -> None:
+  85:     st.header("Research idea")
+  86:     st.write("Generate a research idea provided the data description.")
+  87:     st.write(
+  88:         "Choose between a fast generation process or a more involved one using "
+  89:         "planning and control through [cmbagent](https://github.com/CMBAgents/cmbagent).")
+  90:     fast = st.toggle("Fast generation", value=True, key="fast_toggle_idea")
+  91:     model_keys = list(models.keys())
+  92:     if fast:
+  93:         default_fast_idea_index = model_keys.index("gemini-2.0-flash")
+  94:         st.caption("Choose a LLM model for the fast generation")
+  95:         llm_model = st.selectbox(
+  96:             "LLM Model",
+  97:             model_keys,
+  98:             index=default_fast_idea_index,
+  99:             key="llm_model_idea",
+ 100:         )
+ 101:     else:
+ 102:         default_idea_maker_index = model_keys.index("gpt-4o")
+ 103:         default_idea_hater_index = model_keys.index("claude-3.7-sonnet")
+ 104:         col1, col2 = st.columns(2)
+ 105:         with col1:
+ 106:             st.caption(
+ 107:                 "Idea Maker: Generates and selects the best research ideas based on "
+ 108:                 "the data description")
+ 109:             idea_maker_model = st.selectbox(
+ 110:                 "Idea Maker Model",
+ 111:                 model_keys,
+ 112:                 index=default_idea_maker_index,
+ 113:                 key="idea_maker_model",
+ 114:             )
+ 115:         with col2:
+ 116:             st.caption(
+ 117:                 "Idea Hater: Critiques ideas and proposes recommendations for "
+ 118:                 "improvement"
+ 119:             )
+ 120:             idea_hater_model = st.selectbox(
+ 121:                 "Idea Hater Model",
+ 122:                 model_keys,
+ 123:                 index=default_idea_hater_index,
+ 124:                 key="idea_hater_model",
+ 125:             )
+ 126:     if not fast:
+ 127:         col3, col4 = st.columns(2)
+ 128:         with col3:
+ 129:             st.caption(
+ 130:                 "Planner: Creates a detailed plan for generating research ideas"
+ 131:             )
+ 132:             planner_model = st.selectbox(
+ 133:                 "Planner Model",
+ 134:                 model_keys,
+ 135:                 index=model_keys.index("gpt-4o"),
+ 136:                 key="planner_model_idea",
+ 137:             )
+ 138:         with col4:
+ 139:             st.caption(
+ 140:                 "Plan Reviewer: Reviews and improves the generated plan"
+ 141:             )
+ 142:             plan_reviewer_model = st.selectbox(
+ 143:                 "Plan Reviewer Model",
+ 144:                 model_keys,
+ 145:                 index=model_keys.index("claude-3.7-sonnet"),
+ 146:                 key="plan_reviewer_model_idea",
+ 147:             )
+ 148:     if "idea_running" not in st.session_state:
+ 149:         st.session_state.idea_running = False
+ 150:     col1, col2 = st.columns([1, 1])
+ 151:     with col1:
+ 152:         press_button = st.button(
+ 153:             "Generate",
+ 154:             type="primary",
+ 155:             key="get_idea",
+ 156:             disabled=st.session_state.idea_running,
+ 157:         )
+ 158:     with col2:
+ 159:         stop_button = st.button(
+ 160:             "Stop",
+ 161:             type="secondary",
+ 162:             key="stop_idea",
+ 163:             disabled=not st.session_state.idea_running,
+ 164:         )
+ 165:     st.markdown(
+ 166: ,
+ 167:         unsafe_allow_html=True,
+ 168:     )
+ 169:     if press_button and not st.session_state.idea_running:
+ 170:         st.session_state.idea_running = True
+ 171:         st.rerun()
+ 172:     if stop_button and st.session_state.idea_running:
+ 173:         st.session_state.idea_running = False
+ 174:         st.warning("Operation stopped by user.")
+ 175:         st.rerun()
+ 176:     if st.session_state.idea_running:
+ 177:         with st.spinner("Generating research idea...", show_time=True):
+ 178:             log_box = st.empty()
+ 179:             with stream_to_streamlit(log_box):
+ 180:                 try:
+ 181:                     if fast:
+ 182:                         den.get_idea_fast(llm=llm_model, verbose=True)
+ 183:                     else:
+ 184:                         den.get_idea(
+ 185:                             idea_maker_model=models[idea_maker_model],
+ 186:                             idea_hater_model=models[idea_hater_model],
+ 187:                             planner_model=models[planner_model],
+ 188:                             plan_reviewer_model=models[plan_reviewer_model],
+ 189:                         )
+ 190:                     if (
+ 191:                         st.session_state.idea_running
+ 192:                     ):
+ 193:                         st.success("Done!")
+ 194:                         st.markdown("---")
+ 195:                         st.write("**Review and edit the generated idea:**")
+ 196:                         try:
+ 197:                             idea_path = den.project_dir + "/input_files/idea.md"
+ 198:                             with open(idea_path, 'r') as f:
+ 199:                                 current_idea = f.read()
+ 200:                             if "current_idea_content" not in st.session_state:
+ 201:                                 st.session_state.current_idea_content = current_idea
+ 202:                             edited_idea = st.text_area(
+ 203:                                 "Edit the research idea",
+ 204:                                 value=st.session_state.current_idea_content,
+ 205:                                 height=200,
+ 206:                                 key="idea_review_area",
+ 207:                                 help="Review and modify the generated research idea before proceeding")
+ 208:                             st.session_state.current_idea_content = edited_idea
+ 209:                             col_a, col_b = st.columns([1, 3])
+ 210:                             with col_a:
+ 211:                                 if st.button(
+ 212:                                         "Accept idea", key="accept_idea_btn"):
+ 213:                                     with open(idea_path, 'w') as f:
+ 214:                                         f.write(edited_idea)
+ 215:                                     den.set_idea(edited_idea)
+ 216:                                     st.success("Idea updated successfully!")
+ 217:                                     st.rerun()
+ 218:                             with col_b:
+ 219:                                 if st.button(
+ 220:                                         "Reset to original", key="reset_idea_btn"):
+ 221:                                     st.rerun()
+ 222:                         except Exception as e:
+ 223:                             st.warning(f"Idea review UI error: {str(e)}")
+ 224:                 except Exception as e:
+ 225:                     st.error(f"Error: {str(e)}")
+ 226:                 finally:
+ 227:                     st.session_state.idea_running = False
+ 228:     uploaded_file = st.file_uploader(
+ 229:         "Choose a file with the research idea", accept_multiple_files=False
+ 230:     )
+ 231:     if uploaded_file:
+ 232:         content = uploaded_file.read().decode("utf-8")
+ 233:         den.set_idea(content)
+ 234:     try:
+ 235:         idea_path = den.project_dir + "/input_files/idea.md"
+ 236:         if os.path.exists(idea_path):
+ 237:             with open(idea_path, 'r') as f:
+ 238:                 idea_content = f.read()
+ 239:             if "current_idea_content" not in st.session_state:
+ 240:                 st.session_state.current_idea_content = idea_content
+ 241:             st.markdown("### Current research idea")
+ 242:             st.markdown(st.session_state.current_idea_content)
+ 243:             st.markdown("**Edit the research idea:**")
+ 244:             edited_idea = st.text_area(
+ 245:                 "Edit the research idea",
+ 246:                 value=st.session_state.current_idea_content,
+ 247:                 height=200,
+ 248:                 key="idea_edit_area",
+ 249:                 help="Review and modify the research idea"
+ 250:             )
+ 251:             st.session_state.current_idea_content = edited_idea
+ 252:             col_a, col_b = st.columns([1, 3])
+ 253:             with col_a:
+ 254:                 if st.button("Save changes", key="save_idea_btn"):
+ 255:                     with open(idea_path, 'w') as f:
+ 256:                         f.write(edited_idea)
+ 257:                     den.set_idea(edited_idea)
+ 258:                     st.success("Idea updated successfully!")
+ 259:                     st.rerun()
+ 260:             with col_b:
+ 261:                 if st.button("Reset to original", key="reset_idea_btn"):
+ 262:                     st.session_state.current_idea_content = idea_content
+ 263:                     st.rerun()
+ 264:         else:
+ 265:             st.write("Idea not generated or uploaded.")
+ 266:     except Exception as e:
+ 267:         st.write(f"Error loading idea: {e}")
+ 268:         st.write("Idea not generated or uploaded.")
+ 269: def method_comp(den: Denario) -> None:
+ 270:     st.header("Methods")
+ 271:     st.write(
+ 272:         "Generate the methods to be employed in the computation of the results, provided the idea and data description."
+ 273:     )
+ 274:     st.write(
+ 275:         "Choose between a fast generation process or a more involved one using planning and control through [cmbagent](https://github.com/CMBAgents/cmbagent)."
+ 276:     )
+ 277:     fast = st.toggle("Fast generation", value=True, key="fast_toggle_method")
+ 278:     model_keys = list(models.keys())
+ 279:     default_fast_method_index = model_keys.index("gemini-2.0-flash")
+ 280:     if fast:
+ 281:         st.caption("Choose a LLM model for the fast generation")
+ 282:         llm_model = st.selectbox(
+ 283:             "LLM Model",
+ 284:             model_keys,
+ 285:             index=default_fast_method_index,
+ 286:             key="llm_model_method",
+ 287:         )
+ 288:     else:
+ 289:         default_planner_index = model_keys.index("gpt-4o")
+ 290:         default_plan_reviewer_index = model_keys.index("claude-3.7-sonnet")
+ 291:         default_method_generator_index = model_keys.index("gpt-4o")
+ 292:         col1, col2 = st.columns(2)
+ 293:         with col1:
+ 294:             st.caption(
+ 295:                 "Planner: Creates a detailed plan for generating research methodology"
+ 296:             )
+ 297:             planner_model = st.selectbox(
+ 298:                 "Planner Model",
+ 299:                 model_keys,
+ 300:                 index=default_planner_index,
+ 301:                 key="planner_model_method",
+ 302:             )
+ 303:         with col2:
+ 304:             st.caption(
+ 305:                 "Plan Reviewer: Reviews and improves the generated methodology plan"
+ 306:             )
+ 307:             plan_reviewer_model = st.selectbox(
+ 308:                 "Plan Reviewer Model",
+ 309:                 model_keys,
+ 310:                 index=default_plan_reviewer_index,
+ 311:                 key="plan_reviewer_model_method",
+ 312:             )
+ 313:         col3, col4 = st.columns(2)
+ 314:         with col3:
+ 315:             st.caption("Method Generator: Generates the methodology")
+ 316:             method_generator_model = st.selectbox(
+ 317:                 "Method Generator Model",
+ 318:                 model_keys,
+ 319:                 index=default_method_generator_index,
+ 320:                 key="method_generator_model",
+ 321:             )
+ 322:     if "method_running" not in st.session_state:
+ 323:         st.session_state.method_running = False
+ 324:     col1, col2 = st.columns([1, 1])
+ 325:     with col1:
+ 326:         press_button = st.button(
+ 327:             "Generate",
+ 328:             type="primary",
+ 329:             key="get_method",
+ 330:             disabled=st.session_state.method_running,
+ 331:         )
+ 332:     with col2:
+ 333:         stop_button = st.button(
+ 334:             "Stop",
+ 335:             type="secondary",
+ 336:             key="stop_method",
+ 337:             disabled=not st.session_state.method_running,
+ 338:         )
+ 339:     st.markdown(
+ 340: ,
+ 341:         unsafe_allow_html=True,
+ 342:     )
+ 343:     if press_button and not st.session_state.method_running:
+ 344:         st.session_state.method_running = True
+ 345:         st.rerun()
+ 346:     if stop_button and st.session_state.method_running:
+ 347:         st.session_state.method_running = False
+ 348:         st.warning("Operation stopped by user.")
+ 349:         st.rerun()
+ 350:     if st.session_state.method_running:
+ 351:         with st.spinner("Generating methods...", show_time=True):
+ 352:             log_box = st.empty()
+ 353:             with stream_to_streamlit(log_box):
+ 354:                 try:
+ 355:                     if fast:
+ 356:                         den.get_method_fast(llm=llm_model, verbose=True)
+ 357:                     else:
+ 358:                         den.get_method(
+ 359:                             planner_model=models[planner_model],
+ 360:                             plan_reviewer_model=models[plan_reviewer_model],
+ 361:                             method_generator_model=models[
+ 362:                                 method_generator_model
+ 363:                             ],
+ 364:                         )
+ 365:                     if (
+ 366:                         st.session_state.method_running
+ 367:                     ):
+ 368:                         st.success("Done!")
+ 369:                         st.markdown("---")
+ 370:                         st.write(
+ 371:                             "**Review and edit the generated methodology:**")
+ 372:                         try:
+ 373:                             method_path = den.project_dir + "/input_files/methods.md"
+ 374:                             with open(method_path, 'r') as f:
+ 375:                                 current_method = f.read()
+ 376:                             edited_method = st.text_area(
+ 377:                                 "Edit the methodology",
+ 378:                                 value=current_method,
+ 379:                                 height=300,
+ 380:                                 key="method_review_area",
+ 381:                                 help="Review and modify the generated methodology before proceeding"
+ 382:                             )
+ 383:                             col_a, col_b = st.columns([1, 3])
+ 384:                             with col_a:
+ 385:                                 if st.button(
+ 386:                                         "Accept method", key="accept_method_btn"):
+ 387:                                     with open(method_path, 'w') as f:
+ 388:                                         f.write(edited_method)
+ 389:                                     den.set_method(edited_method)
+ 390:                                     st.success(
+ 391:                                         "Methodology updated successfully!")
+ 392:                                     st.rerun()
+ 393:                             with col_b:
+ 394:                                 if st.button(
+ 395:                                         "Reset to original", key="reset_method_btn"):
+ 396:                                     st.rerun()
+ 397:                         except Exception as e:
+ 398:                             st.warning(f"Method review UI error: {str(e)}")
+ 399:                 except Exception as e:
+ 400:                     st.error(f"Error: {str(e)}")
+ 401:                 finally:
+ 402:                     st.session_state.method_running = False
+ 403:     uploaded_file = st.file_uploader(
+ 404:         "Choose a file with the research methods", accept_multiple_files=False
+ 405:     )
+ 406:     if uploaded_file:
+ 407:         content = uploaded_file.read().decode("utf-8")
+ 408:         den.set_method(content)
+ 409:     try:
+ 410:         show_markdown_file(
+ 411:             den.project_dir + "/input_files/methods.md", label="methods"
+ 412:         )
+ 413:     except FileNotFoundError:
+ 414:         st.write("Methods not generated or uploaded.")
+ 415: def results_comp(den: Denario) -> None:
+ 416:     st.header("Results")
+ 417:     st.write(
+ 418:         "Compute the results, given the methods, idea and data description."
+ 419:     )
+ 420:     model_keys = list(models.keys())
+ 421:     default_researcher_index = model_keys.index("gemini-2.5-pro")
+ 422:     default_engineer_index = model_keys.index("gemini-2.5-pro")
+ 423:     col1, col2 = st.columns(2)
+ 424:     with col1:
+ 425:         st.caption("Engineer: Generates the code to compute the results")
+ 426:         engineer_model = st.selectbox(
+ 427:             "Engineer Model",
+ 428:             model_keys,
+ 429:             index=default_engineer_index,
+ 430:             key="engineer_model",
+ 431:         )
+ 432:     with col2:
+ 433:         st.caption(
+ 434:             "Researcher: processes the results and writes the results report"
+ 435:         )
+ 436:         researcher_model = st.selectbox(
+ 437:             "Researcher Model",
+ 438:             model_keys,
+ 439:             index=default_researcher_index,
+ 440:             key="researcher_model",
+ 441:         )
+ 442:     with st.expander("Options for the results generation"):
+ 443:         restart_at_step = st.number_input(
+ 444:             "Restart at step", min_value=0, max_value=100, value=0
+ 445:         )
+ 446:         hardware_constraints = st.text_input(
+ 447:             "Hardware constraints", placeholder="cpu:2, ram:16g, gpu:1"
+ 448:         )
+ 449:         default_planner_index = model_keys.index("gpt-4o")
+ 450:         default_plan_reviewer_index = model_keys.index("claude-3.7-sonnet")
+ 451:         col1, col2 = st.columns(2)
+ 452:         with col1:
+ 453:             st.caption(
+ 454:                 "Planner: Creates a detailed plan for generating research results"
+ 455:             )
+ 456:             planner_model = st.selectbox(
+ 457:                 "Planner Model",
+ 458:                 model_keys,
+ 459:                 index=default_planner_index,
+ 460:                 key="planner_model_results",
+ 461:             )
+ 462:         with col2:
+ 463:             st.caption("Plan Reviewer: Reviews and improves the proposed plan")
+ 464:             plan_reviewer_model = st.selectbox(
+ 465:                 "Plan Reviewer Model",
+ 466:                 model_keys,
+ 467:                 index=default_plan_reviewer_index,
+ 468:                 key="plan_reviewer_model_results",
+ 469:             )
+ 470:         max_n_attempts = st.number_input(
+ 471:             "Max number of code execution attempts",
+ 472:             min_value=1,
+ 473:             max_value=10,
+ 474:             value=6,
+ 475:         )
+ 476:         max_n_steps = st.number_input(
+ 477:             "Max number of steps", min_value=1, max_value=10, value=6
+ 478:         )
+ 479:     if "results_running" not in st.session_state:
+ 480:         st.session_state.results_running = False
+ 481:     col1, col2 = st.columns([1, 1])
+ 482:     with col1:
+ 483:         press_button = st.button(
+ 484:             "Generate",
+ 485:             type="primary",
+ 486:             key="get_results",
+ 487:             disabled=st.session_state.results_running,
+ 488:         )
+ 489:     with col2:
+ 490:         stop_button = st.button(
+ 491:             "Stop",
+ 492:             type="secondary",
+ 493:             key="stop_results",
+ 494:             disabled=not st.session_state.results_running,
+ 495:         )
+ 496:     st.markdown(
+ 497: ,
+ 498:         unsafe_allow_html=True,
+ 499:     )
+ 500:     if press_button and not st.session_state.results_running:
+ 501:         st.session_state.results_running = True
+ 502:         st.rerun()
+ 503:     if stop_button and st.session_state.results_running:
+ 504:         st.session_state.results_running = False
+ 505:         st.warning("Operation stopped by user.")
+ 506:         st.rerun()
+ 507:     if st.session_state.results_running:
+ 508:         with st.spinner("Computing results...", show_time=True):
+ 509:             log_box = st.empty()
+ 510:             with stream_to_streamlit(log_box):
+ 511:                 try:
+ 512:                     den.get_results(
+ 513:                         engineer_model=models[engineer_model],
+ 514:                         researcher_model=models[researcher_model],
+ 515:                         restart_at_step=restart_at_step,
+ 516:                         hardware_constraints=hardware_constraints,
+ 517:                         planner_model=models[planner_model],
+ 518:                         plan_reviewer_model=models[plan_reviewer_model],
+ 519:                         max_n_attempts=max_n_attempts,
+ 520:                         max_n_steps=max_n_steps,
+ 521:                     )
+ 522:                     if (
+ 523:                         st.session_state.results_running
+ 524:                     ):
+ 525:                         st.success("Done!")
+ 526:                 except Exception as e:
+ 527:                     st.error(f"Error: {str(e)}")
+ 528:                 finally:
+ 529:                     st.session_state.results_running = False
+ 530:     uploaded_files = st.file_uploader(
+ 531:         "Upload markdown file and/or plots from the results of the research",
+ 532:         accept_multiple_files=True,
+ 533:     )
+ 534:     if uploaded_files:
+ 535:         plots = []
+ 536:         for file in uploaded_files:
+ 537:             if file.name.endswith(".md"):
+ 538:                 content = file.read().decode("utf-8")
+ 539:                 den.set_results(content)
+ 540:             else:
+ 541:                 plots.append(Image.open(file))
+ 542:         den.set_plots(plots)
+ 543:     plots = list(Path(den.project_dir + "/input_files/plots").glob("*"))
+ 544:     num_plots = len(list(plots))
+ 545:     if num_plots > 0:
+ 546:         plots_cols = st.columns(num_plots)
+ 547:         for i, plot in enumerate(plots):
+ 548:             with plots_cols[i]:
+ 549:                 st.image(plot, caption=plot.name)
+ 550:         plots_zip = create_zip_in_memory(
+ 551:             den.project_dir + "/input_files/plots"
+ 552:         )
+ 553:         st.download_button(
+ 554:             label="Download plots",
+ 555:             data=plots_zip,
+ 556:             file_name="plots.zip",
+ 557:             mime="application/zip",
+ 558:             icon=":material/download:",
+ 559:         )
+ 560:     else:
+ 561:         st.write("Plots not generated or uploaded.")
+ 562:     try:
+ 563:         codes_zip = create_zip_in_memory(
+ 564:             den.project_dir + "/experiment_generation_output"
+ 565:         )
+ 566:         st.download_button(
+ 567:             label="Download codes",
+ 568:             data=codes_zip,
+ 569:             file_name="codes.zip",
+ 570:             mime="application/zip",
+ 571:             icon=":material/download:",
+ 572:         )
+ 573:         show_markdown_file(
+ 574:             den.project_dir + "/input_files/results.md",
+ 575:             label="results summary",
+ 576:         )
+ 577:     except FileNotFoundError:
+ 578:         st.write("Results not generated or uploaded.")
+ 579: def paper_comp(den: Denario) -> None:
+ 580:     st.header("Article")
+ 581:     st.write("Write the article using the computed results of the research.")
+ 582:     with st.expander("Options for the paper writing agents"):
+ 583:         st.caption("Choose a LLM model for the paper generation")
+ 584:         llm_model = st.selectbox(
+ 585:             "LLM Model", models.keys(), index=0, key="llm_model_paper"
+ 586:         )
+ 587:         selected_journal = st.selectbox(
+ 588:             "Choose the journal for the latex style:",
+ 589:             [j.value for j in Journal],
+ 590:             index=0,
+ 591:             key="journal_select",
+ 592:         )
+ 593:         citations = st.toggle(
+ 594:             "Add citations", value=True, key="toggle_citations"
+ 595:         )
+ 596:         writer = st.text_input(
+ 597:             "Describe the type of researcher e.g. cosmologist, biologist... Default is 'scientist'.",
+ 598:             placeholder="scientist",
+ 599:             key="writer_type",
+ 600:             value="scientist",
+ 601:         )
+ 602:     if "paper_running" not in st.session_state:
+ 603:         st.session_state.paper_running = False
+ 604:     col1, col2 = st.columns([1, 1])
+ 605:     with col1:
+ 606:         press_button = st.button(
+ 607:             "Generate",
+ 608:             type="primary",
+ 609:             key="get_paper",
+ 610:             disabled=st.session_state.paper_running,
+ 611:         )
+ 612:     with col2:
+ 613:         stop_button = st.button(
+ 614:             "Stop",
+ 615:             type="secondary",
+ 616:             key="stop_paper",
+ 617:             disabled=not st.session_state.paper_running,
+ 618:         )
+ 619:     st.markdown(
+ 620: ,
+ 621:         unsafe_allow_html=True,
+ 622:     )
+ 623:     if press_button and not st.session_state.paper_running:
+ 624:         st.session_state.paper_running = True
+ 625:         st.rerun()
+ 626:     if stop_button and st.session_state.paper_running:
+ 627:         st.session_state.paper_running = False
+ 628:         st.warning("Operation stopped by user.")
+ 629:         st.rerun()
+ 630:     if st.session_state.paper_running:
+ 631:         with st.spinner("Writing the paper...", show_time=True):
+ 632:             try:
+ 633:                 den.get_paper(
+ 634:                     journal=selected_journal,
+ 635:                     llm=llm_model,
+ 636:                     writer=writer,
+ 637:                     add_citations=citations,
+ 638:                 )
+ 639:                 if (
+ 640:                     st.session_state.paper_running
+ 641:                 ):
+ 642:                     st.success("Done!")
+ 643:                     st.balloons()
+ 644:             except Exception as e:
+ 645:                 st.error(f"Error: {str(e)}")
+ 646:             finally:
+ 647:                 st.session_state.paper_running = False
+ 648:     try:
+ 649:         texfile = den.project_dir + "/paper/paper_v4_final.tex"
+ 650:         with open(texfile, "r") as f:
+ 651:             f.read()
+ 652:         paper_zip = create_zip_in_memory(den.project_dir + "/paper")
+ 653:         st.download_button(
+ 654:             label="Download latex files",
+ 655:             data=paper_zip,
+ 656:             file_name="paper.zip",
+ 657:             mime="application/zip",
+ 658:             icon=":material/download:",
+ 659:         )
+ 660:     except FileNotFoundError:
+ 661:         st.write("Latex not generated yet.")
+ 662:     try:
+ 663:         pdffile = den.project_dir + "/paper/paper_v4_final.pdf"
+ 664:         with open(pdffile, "rb") as pdf_file:
+ 665:             PDFbyte = pdf_file.read()
+ 666:         st.download_button(
+ 667:             label="Download pdf",
+ 668:             data=PDFbyte,
+ 669:             file_name="paper.pdf",
+ 670:             mime="application/octet-stream",
+ 671:             icon=":material/download:",
+ 672:         )
+ 673:         pdf_viewer(pdffile)
+ 674:     except FileNotFoundError:
+ 675:         st.write("Pdf not generated yet.")
+ 676: def check_idea_comp(den: Denario) -> None:
+ 677:     st.header("Check idea")
+ 678:     st.write(
+ 679:         "Check if the research idea has been investigated in previous literature."
+ 680:     )
+ 681:     fast = st.toggle(
+ 682:         "Fast generation", value=True, key="fast_toggle_check_idea"
+ 683:     )
+ 684:     colp, _ = st.columns([2, 1])
+ 685:     with colp:
+ 686:         provider = st.selectbox(
+ 687:             "Retrieval provider",
+ 688:             RAG_PROVIDERS,
+ 689:             index=0,
+ 690:             key="rag_provider_check_idea",
+ 691:             help="Perplexity = web academic search; Domain = Planck/CAMB/CLASSY sources",
+ 692:         )
+ 693:     try:
+ 694:         den.set_idea()
+ 695:         idea = den.research.idea
+ 696:         st.markdown("### Current idea")
+ 697:         st.write(idea)
+ 698:         if "literature_running" not in st.session_state:
+ 699:             st.session_state.literature_running = False
+ 700:         col1, col2 = st.columns([1, 1])
+ 701:         with col1:
+ 702:             press_button = st.button(
+ 703:                 "Literature search",
+ 704:                 type="primary",
+ 705:                 key="get_literature",
+ 706:                 disabled=st.session_state.literature_running,
+ 707:             )
+ 708:         with col2:
+ 709:             stop_button = st.button(
+ 710:                 "Stop",
+ 711:                 type="secondary",
+ 712:                 key="stop_literature",
+ 713:                 disabled=not st.session_state.literature_running,
+ 714:             )
+ 715:         st.markdown(
+ 716: ,
+ 717:             unsafe_allow_html=True,
+ 718:         )
+ 719:         if press_button and not st.session_state.literature_running:
+ 720:             st.session_state.literature_running = True
+ 721:             st.rerun()
+ 722:         if stop_button and st.session_state.literature_running:
+ 723:             st.session_state.literature_running = False
+ 724:             st.warning("Operation stopped by user.")
+ 725:             st.rerun()
+ 726:         if st.session_state.literature_running:
+ 727:             with st.spinner(
+ 728:                 "Searching for previous literature...", show_time=True
+ 729:             ):
+ 730:                 log_box = st.empty()
+ 731:                 with stream_to_streamlit(log_box):
+ 732:                     try:
+ 733:                         query = den.research.idea if hasattr(
+ 734:                             den.research, 'idea') else "cosmology research"
+ 735:                         results, provider_info, error = _retrieve_with_unified_adapter(
+ 736:                             provider, query, 5)
+ 737:                         if error:
+ 738:                             st.error(f"RAG retrieval error: {error}")
+ 739:                             if fast:
+ 740:                                 result = den.check_idea_fast(verbose=True)
+ 741:                             else:
+ 742:                                 result = den.check_idea()
+ 743:                         else:
+ 744:                             if provider_info.get("available"):
+ 745:                                 if provider_info.get("corpus_stats"):
+ 746:                                     stats = provider_info["corpus_stats"]
+ 747:                                     st.info(
+ 748:                                         f"{
+ 749:                                             provider_info['name']}: {
+ 750:                                             stats['documents']} documents, {
+ 751:                                             stats['entities']} entities indexed")
+ 752:                                 else:
+ 753:                                     st.info(f"Using {provider_info['name']}")
+ 754:                             else:
+ 755:                                 st.warning(
+ 756:                                     f"{provider_info['name']} not available, using fallback")
+ 757:                             if results:
+ 758:                                 st.write(
+ 759:                                     f"**Relevant documents from {provider_info['name']}:**")
+ 760:                                 for i, result in enumerate(results, 1):
+ 761:                                     with st.expander(f"{i}. {result.title} (score: {result.score:.2f})"):
+ 762:                                         st.write(f"**URL:** {result.url}")
+ 763:                                         if result.doi:
+ 764:                                             st.write(
+ 765:                                                 f"**DOI:** https://doi.org/{result.doi}")
+ 766:                                         if result.metadata.get("authors"):
+ 767:                                             authors = result.metadata["authors"][:3]
+ 768:                                             st.write(
+ 769:                                                 f"**Authors:** {', '.join(authors)}")
+ 770:                                             if len(
+ 771:                                                     result.metadata["authors"]) > 3:
+ 772:                                                 st.write(
+ 773:                                                     f"({len(result.metadata['authors'])} total authors)")
+ 774:                                         if result.metadata.get("categories"):
+ 775:                                             st.write(
+ 776:                                                 f"**Categories:** {', '.join(result.metadata['categories'][:2])}")
+ 777:                                         if result.metadata.get("entities"):
+ 778:                                             st.write(
+ 779:                                                 f"**Key terms:** {', '.join(result.metadata['entities'][:5])}")
+ 780:                                         st.write(
+ 781:                                             f"**Content preview:** {result.content[:500]}...")
+ 782:                                 from .rag_adapter import format_results_for_ui
+ 783:                                 result = format_results_for_ui(results)
+ 784:                             else:
+ 785:                                 result = f"No relevant documents found using {
+ 786:                                     provider_info['name']}."
+ 787:                         st.write(result)
+ 788:                         if provider.startswith("Perplexity") and not results:
+ 789:                             if fast:
+ 790:                                 result = den.check_idea_fast(verbose=True)
+ 791:                             else:
+ 792:                                 result = den.check_idea()
+ 793:                         elif "GraphRAG" in provider and not results:
+ 794:                             try:
+ 795:                                 from .graphrag import get_graphrag_retriever
+ 796:                                 retriever = get_graphrag_retriever()
+ 797:                                 stats = retriever.get_corpus_stats()
+ 798:                                 st.info(
+ 799:                                     f"GraphRAG: {
+ 800:                                         stats['documents']} documents, {
+ 801:                                         stats['entities']} entities indexed")
+ 802:                                 query = den.research.idea if hasattr(
+ 803:                                     den.research, 'idea') else "cosmology research"
+ 804:                                 results = retriever.retrieve(
+ 805:                                     query, max_results=5)
+ 806:                                 if results:
+ 807:                                     st.write(
+ 808:                                         "**Relevant documents from local corpus:**")
+ 809:                                     for i, result in enumerate(results, 1):
+ 810:                                         with st.expander(f"{i}. {result['title']} (score: {result['score']:.2f})"):
+ 811:                                             st.write(
+ 812:                                                 f"**Path:** {result['url']}")
+ 813:                                             if result['entities']:
+ 814:                                                 st.write(
+ 815:                                                     f"**Entities:** {', '.join(result['entities'])}")
+ 816:                                             st.write(
+ 817:                                                 f"**Content preview:** {result['content'][:500]}...")
+ 818:                                     result = f"Found {
+ 819:                                         len(results)} relevant documents in local corpus:\n\n"
+ 820:                                     for i, doc in enumerate(results, 1):
+ 821:                                         result += f"{i}. {doc['title']}\n"
+ 822:                                         result += f"   Path: {doc['url']}\n"
+ 823:                                         if doc['entities']:
+ 824:                                             result += f"   Key terms: {', '.join(doc['entities'][:3])}\n"
+ 825:                                         result += "\n"
+ 826:                                 else:
+ 827:                                     result = "No relevant documents found in local corpus."
+ 828:                                 st.write(result)
+ 829:                             except Exception as e:
+ 830:                                 st.error(f"GraphRAG error: {str(e)}")
+ 831:                                 if fast:
+ 832:                                     result = den.check_idea_fast(verbose=True)
+ 833:                                 else:
+ 834:                                     result = den.check_idea()
+ 835:                                 st.write(result)
+ 836:                         elif "arXiv" in provider:
+ 837:                             try:
+ 838:                                 from .arxiv_rag import get_arxiv_retriever
+ 839:                                 retriever = get_arxiv_retriever()
+ 840:                                 query = den.research.idea if hasattr(
+ 841:                                     den.research, 'idea') else "cosmology research"
+ 842:                                 results = retriever.retrieve(
+ 843:                                     query, max_results=5)
+ 844:                                 if results:
+ 845:                                     st.write("**Relevant papers from arXiv:**")
+ 846:                                     for i, result in enumerate(results, 1):
+ 847:                                         with st.expander(f"{i}. {result['title']}"):
+ 848:                                             st.write(
+ 849:                                                 f"**Authors:** {', '.join(result['authors'][:3])}")
+ 850:                                             if result['arxiv_id']:
+ 851:                                                 st.write(
+ 852:                                                     f"**arXiv ID:** {result['arxiv_id']}")
+ 853:                                             if result['doi']:
+ 854:                                                 st.write(
+ 855:                                                     f"**DOI:** https://doi.org/{result['doi']}")
+ 856:                                             st.write(
+ 857:                                                 f"**URL:** {result['url']}")
+ 858:                                             if result['categories']:
+ 859:                                                 st.write(
+ 860:                                                     f"**Categories:** {', '.join(result['categories'])}")
+ 861:                                             st.write(
+ 862:                                                 f"**Abstract:** {result['content'][:300]}...")
+ 863:                                     result = f"Found {
+ 864:                                         len(results)} relevant papers from arXiv:\n\n"
+ 865:                                     for i, doc in enumerate(results, 1):
+ 866:                                         result += f"{i}. {doc['title']}\n"
+ 867:                                         result += f"   Authors: {', '.join(doc['authors'][:3])}\n"
+ 868:                                         if doc['arxiv_id']:
+ 869:                                             result += f"   arXiv ID: {
+ 870:                                                 doc['arxiv_id']}\n"
+ 871:                                         if doc['doi']:
+ 872:                                             result += f"   DOI: https://doi.org/{
+ 873:                                                 doc['doi']}\n"
+ 874:                                         result += f"   URL: {doc['url']}\n"
+ 875:                                         result += f"   Abstract: {doc['content'][:200]}...\n\n"
+ 876:                                 else:
+ 877:                                     result = "No relevant papers found on arXiv."
+ 878:                                 st.write(result)
+ 879:                             except Exception as e:
+ 880:                                 st.error(f"arXiv search error: {str(e)}")
+ 881:                                 if fast:
+ 882:                                     result = den.check_idea_fast(verbose=True)
+ 883:                                 else:
+ 884:                                     result = den.check_idea()
+ 885:                                 st.write(result)
+ 886:                         else:
+ 887:                             if fast:
+ 888:                                 result = den.check_idea_fast(verbose=True)
+ 889:                             else:
+ 890:                                 result = den.check_idea()
+ 891:                             domain_context = _get_domain_context(provider)
+ 892:                             if domain_context:
+ 893:                                 result = f"{result}\n\n--- Domain Context ---\n{domain_context}"
+ 894:                             st.write(result)
+ 895:                         try:
+ 896:                             from pathlib import Path as _Path
+ 897:                             import re as _re
+ 898:                             citations_text = ""
+ 899:                             if isinstance(result, dict):
+ 900:                                 if "citations" in result and isinstance(
+ 901:                                     result["citations"], list
+ 902:                                 ):
+ 903:                                     citations_text = "\n".join(
+ 904:                                         str(x) for x in result["citations"]
+ 905:                                     )
+ 906:                                 elif (
+ 907:                                     "results" in result
+ 908:                                     and isinstance(result["results"], dict)
+ 909:                                     and isinstance(
+ 910:                                         result["results"].get("citations"),
+ 911:                                         list,
+ 912:                                     )
+ 913:                                 ):
+ 914:                                     citations_text = "\n".join(
+ 915:                                         str(x)
+ 916:                                         for x in result["results"]["citations"]
+ 917:                                     )
+ 918:                                 else:
+ 919:                                     citations_text = str(result)
+ 920:                             else:
+ 921:                                 citations_text = str(result)
+ 922:                             urls = _re.findall(
+ 923:                                 r"https?://[^\s)]+", citations_text
+ 924:                             )
+ 925:                             if urls:
+ 926:                                 st.caption(
+ 927:                                     f"Detected {
+ 928:                                         len(urls)} URL(s) in results; you can edit below before saving.")
+ 929:                             st.markdown("---")
+ 930:                             st.write(
+ 931:                                 "Review and edit citations (one per line)."
+ 932:                             )
+ 933:                             edited_citations = st.text_area(
+ 934:                                 "Edit citations",
+ 935:                                 value=citations_text,
+ 936:                                 height=160,
+ 937:                                 key="editable_citations_area",
+ 938:                             )
+ 939:                             col_cit_a, col_cit_b = st.columns([1, 3])
+ 940:                             with col_cit_a:
+ 941:                                 if st.button(
+ 942:                                     "Accept citations",
+ 943:                                     key="accept_citations_btn",
+ 944:                                 ):
+ 945:                                     import json as _json
+ 946:                                     out_dir = _Path(
+ 947:                                         "/data/cmbagents/ragbook/docs/faber2025/refs_selected"
+ 948:                                     )
+ 949:                                     out_dir.mkdir(parents=True, exist_ok=True)
+ 950:                                     raw_lines = [
+ 951:                                         line_str.strip()
+ 952:                                         for line_str in edited_citations.split(
+ 953:                                             "\n"
+ 954:                                         )
+ 955:                                         if line_str.strip()
+ 956:                                     ]
+ 957:                                     structured = []
+ 958:                                     for line in raw_lines:
+ 959:                                         entry = {
+ 960:                                             "title": None,
+ 961:                                             "url": None,
+ 962:                                             "doi": None,
+ 963:                                         }
+ 964:                                         try:
+ 965:                                             obj = _json.loads(line)
+ 966:                                             if isinstance(obj, dict):
+ 967:                                                 entry.update(
+ 968:                                                     {
+ 969:                                                         "title": obj.get(
+ 970:                                                             "title"
+ 971:                                                         ),
+ 972:                                                         "url": obj.get("url"),
+ 973:                                                         "doi": obj.get("doi"),
+ 974:                                                     }
+ 975:                                                 )
+ 976:                                                 structured.append(entry)
+ 977:                                                 continue
+ 978:                                         except Exception:
+ 979:                                             pass
+ 980:                                         _url_match = _re.search(
+ 981:                                             r"https?://[^\s)]+", line
+ 982:                                         )
+ 983:                                         _doi_match = _re.search(
+ 984:                                             r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+", line, )
+ 985:                                         url_val = (
+ 986:                                             _url_match.group(0)
+ 987:                                             if _url_match
+ 988:                                             else None
+ 989:                                         )
+ 990:                                         doi_val = (
+ 991:                                             _doi_match.group(0)
+ 992:                                             if _doi_match
+ 993:                                             else None
+ 994:                                         )
+ 995:                                         title_text = line
+ 996:                                         if url_val:
+ 997:                                             title_text = title_text.replace(
+ 998:                                                 url_val, ""
+ 999:                                             ).strip()
+1000:                                         if doi_val:
+1001:                                             title_text = title_text.replace(
+1002:                                                 doi_val, ""
+1003:                                             ).strip(" .;,-")
+1004:                                         entry["title"] = title_text or None
+1005:                                         entry["url"] = url_val
+1006:                                         entry["doi"] = doi_val
+1007:                                         structured.append(entry)
+1008:                                     out_json = (
+1009:                                         out_dir / "citations_selected.json"
+1010:                                     )
+1011:                                     with open(out_json, "w") as jf:
+1012:                                         jf.write(
+1013:                                             _json.dumps(structured, indent=2)
+1014:                                         )
+1015:                                     out_md = out_dir / "citations_selected.md"
+1016:                                     with open(out_md, "w") as mf:
+1017:                                         for e in structured:
+1018:                                             title_val = (
+1019:                                                 e.get("title") or ""
+1020:                                             ).strip()
+1021:                                             doi_val = (
+1022:                                                 e.get("doi") or ""
+1023:                                             ).strip()
+1024:                                             url_val = (
+1025:                                                 e.get("url") or ""
+1026:                                             ).strip()
+1027:                                             doi_url = (
+1028:                                                 f"https://doi.org/{doi_val}"
+1029:                                                 if doi_val
+1030:                                                 else None
+1031:                                             )
+1032:                                             line = title_val
+1033:                                             if doi_url:
+1034:                                                 line += f" DOI: {doi_url}"
+1035:                                             if url_val and (
+1036:                                                 not doi_url
+1037:                                                 or url_val != doi_url
+1038:                                             ):
+1039:                                                 line += f" {url_val}"
+1040:                                             mf.write(line.strip() + "\n")
+1041:                                     def _slugify(text: str) -> str:
+1042:                                         import re as __re
+1043:                                         return __re.sub(
+1044:                                             r"[^A-Za-z0-9]+", "", text
+1045:                                         )[:50]
+1046:                                     out_bib = (
+1047:                                         out_dir / "citations_selected.bib"
+1048:                                     )
+1049:                                     with open(out_bib, "w") as bf:
+1050:                                         for e in structured:
+1051:                                             title_val = (
+1052:                                                 e.get("title") or ""
+1053:                                             ).strip()
+1054:                                             doi_val = (
+1055:                                                 e.get("doi") or ""
+1056:                                             ).strip()
+1057:                                             url_val = (
+1058:                                                 e.get("url") or ""
+1059:                                             ).strip()
+1060:                                             if doi_val:
+1061:                                                 bib_key = _slugify(doi_val)
+1062:                                             elif title_val:
+1063:                                                 bib_key = _slugify(title_val)
+1064:                                             else:
+1065:                                                 bib_key = "ref"
+1066:                                             bf.write(
+1067:                                                 "@misc{" + bib_key + ",\n"
+1068:                                             )
+1069:                                             if title_val:
+1070:                                                 bf.write(
+1071:                                                     "  title = {"
+1072:                                                     + title_val
+1073:                                                     + "},\n"
+1074:                                                 )
+1075:                                             if doi_val:
+1076:                                                 bf.write(
+1077:                                                     "  doi = {"
+1078:                                                     + doi_val
+1079:                                                     + "},\n"
+1080:                                                 )
+1081:                                             if doi_val:
+1082:                                                 bf.write(
+1083:                                                     "  url = {https://doi.org/"
+1084:                                                     + doi_val
+1085:                                                     + "},\n"
+1086:                                                 )
+1087:                                             elif url_val:
+1088:                                                 bf.write(
+1089:                                                     "  url = {"
+1090:                                                     + url_val
+1091:                                                     + "},\n"
+1092:                                                 )
+1093:                                             bf.write(
+1094:                                                 "  note = {Generated by DenarioApp HITL citation review}\n"
+1095:                                             )
+1096:                                             bf.write("}\n\n")
+1097:                                     st.success(
+1098:                                         f"Saved reviewed citations to "
+1099:                                         f"{out_json}, {out_md}, and {out_bib}"
+1100:                                     )
+1101:                         except Exception as _e:
+1102:                             st.warning(f"Citation review UI error: {str(_e)}")
+1103:                         if (
+1104:                             st.session_state.literature_running
+1105:                         ):
+1106:                             st.success("Literature search completed!")
+1107:                     except Exception as e:
+1108:                         st.error(f"Error: {str(e)}")
+1109:                     finally:
+1110:                         st.session_state.literature_running = False
+1111:     except FileNotFoundError:
+1112:         st.write("Need to generate an idea first.")
+1113: def keywords_comp(den: Denario) -> None:
+1114:     st.header("Keywords")
+1115:     st.write("Generate keywords from your research text.")
+1116:     input_text = st.text_area(
+1117:         "Enter your research text to extract keywords:",
+1118:         placeholder="Multi-agent systems (MAS) utilizing multiple Large Language Model agents with Retrieval Augmented Generation and that can execute code locally may become beneficial in cosmological data analysis. Here, we illustrate a first small step towards AI-assisted analyses and a glimpse of the potential of MAS to automate and optimize scientific workflows in Cosmology. The system architecture of our example package, that builds upon the autogen/ag2 framework, can be applied to MAS in any area of quantitative scientific research. The particular task we apply our methods to is the cosmological parameter analysis of the Atacama Cosmology Telescope lensing power spectrum likelihood using Monte Carlo Markov Chains. Our work-in-progress code is open source and available at this https URL.",
+1119:         height=200,
+1120:     )
+1121:     n_keywords = st.slider(
+1122:         "Number of keywords to generate:", min_value=1, max_value=10, value=5
+1123:     )
+1124:     if "keywords_running" not in st.session_state:
+1125:         st.session_state.keywords_running = False
+1126:     col1, col2 = st.columns([1, 1])
+1127:     with col1:
+1128:         press_button = st.button(
+1129:             "Generate Keywords",
+1130:             type="primary",
+1131:             key="get_keywords",
+1132:             disabled=st.session_state.keywords_running,
+1133:         )
+1134:     with col2:
+1135:         stop_button = st.button(
+1136:             "Stop",
+1137:             type="secondary",
+1138:             key="stop_keywords",
+1139:             disabled=not st.session_state.keywords_running,
+1140:         )
+1141:     st.markdown(
+1142: ,
+1143:         unsafe_allow_html=True,
+1144:     )
+1145:     if press_button and input_text and not st.session_state.keywords_running:
+1146:         st.session_state.keywords_running = True
+1147:         st.rerun()
+1148:     elif press_button and not input_text:
+1149:         st.warning("Please enter some text to generate keywords.")
+1150:     if stop_button and st.session_state.keywords_running:
+1151:         st.session_state.keywords_running = False
+1152:         st.warning("Operation stopped by user.")
+1153:         st.rerun()
+1154:     if st.session_state.keywords_running and input_text:
+1155:         with st.spinner("Generating keywords..."):
+1156:             try:
+1157:                 den.get_keywords(input_text, n_keywords=n_keywords)
+1158:                 if (
+1159:                     st.session_state.keywords_running
+1160:                 ):
+1161:                     generated_kw = st.session_state.get('generated_keywords')
+1162:                     if ((hasattr(den.research, "keywords")
+1163:                          and den.research.keywords) or generated_kw):
+1164:                         if hasattr(
+1165:                                 den.research,
+1166:                                 "keywords") and den.research.keywords:
+1167:                             st.session_state['generated_keywords'] = den.research.keywords
+1168:                             generated_kw = den.research.keywords
+1169:                         st.success("Keywords generated!")
+1170:                         st.write("### Generated Keywords")
+1171:                         for keyword, url in (generated_kw or {}).items():
+1172:                             st.markdown(f"- [{keyword}]({url})")
+1173:                         st.markdown("---")
+1174:                         st.write("Review and edit keywords (comma-separated).")
+1175:                         default_keywords = st.session_state.get(
+1176:                             "accepted_keywords",
+1177:                             ", ".join(
+1178:                                 list(
+1179:                                     (st.session_state.get('generated_keywords') or getattr(
+1180:                                         den.research,
+1181:                                         'keywords',
+1182:                                         {}) or {}).keys())),
+1183:                         )
+1184:                         editable_keywords = st.text_area(
+1185:                             "Edit keywords",
+1186:                             value=default_keywords,
+1187:                             height=120,
+1188:                             key="editable_keywords_area",
+1189:                         )
+1190:                         col_a, col_b = st.columns([1, 3])
+1191:                         with col_a:
+1192:                             if st.button(
+1193:                                 "Accept keywords", key="accept_keywords_btn"
+1194:                             ):
+1195:                                 edited_list = [
+1196:                                     k.strip()
+1197:                                     for k in editable_keywords.split(",")
+1198:                                     if k.strip()
+1199:                                 ]
+1200:                                 try:
+1201:                                     out_dir = Path(
+1202:                                         den.project_dir) / "input_files"
+1203:                                     out_dir.mkdir(parents=True, exist_ok=True)
+1204:                                     out_path = out_dir / "keywords_selected.md"
+1205:                                     with open(out_path, "w", encoding="utf-8") as f:
+1206:                                         f.write(
+1207:                                             "Keywords: "
+1208:                                             + ", ".join(edited_list)
+1209:                                             + "\n"
+1210:                                         )
+1211:                                     paper_temp_dir = Path(
+1212:                                         den.project_dir) / "paper" / "temp"
+1213:                                     paper_temp_dir.mkdir(
+1214:                                         parents=True, exist_ok=True)
+1215:                                     keywords_tex = paper_temp_dir / "Keywords.tex"
+1216:                                     _kw = ", ".join(edited_list)
+1217:                                     _latex_doc = (
+1218:                                         "\\documentclass{article}\n"
+1219:                                         "\\usepackage{amsmath}\n"
+1220:                                         "\\begin{document}\n"
+1221:                                         f"{_kw}\n"
+1222:                                         "\\end{document}\n"
+1223:                                     )
+1224:                                     with open(keywords_tex, "w", encoding="utf-8") as f:
+1225:                                         f.write(_latex_doc)
+1226:                                     md_ok = out_path.exists() and out_path.stat().st_size > 0
+1227:                                     tex_ok = keywords_tex.exists() and keywords_tex.stat().st_size > 0
+1228:                                     st.session_state["accepted_keywords"] = ", ".join(
+1229:                                         edited_list)
+1230:                                     if md_ok and tex_ok:
+1231:                                         st.success(
+1232:                                             f"Saved reviewed keywords to {out_path} and {keywords_tex}")
+1233:                                         try:
+1234:                                             saved_kw = keywords_tex.read_text(
+1235:                                                 encoding="utf-8"
+1236:                                             ).strip()
+1237:                                             st.caption(
+1238:                                                 "Saved Keywords (paper/temp/Keywords.tex):"
+1239:                                             )
+1240:                                             st.code(saved_kw, language="latex")
+1241:                                         except Exception as preview_err:
+1242:                                             st.info(
+1243:                                                 f"Keywords saved, but preview unavailable: {preview_err}")
+1244:                                     else:
+1245:                                         st.error(
+1246:                                             f"Keywords not fully saved. Exists: md={md_ok}, tex={tex_ok}.")
+1247:                                 except Exception as save_err:
+1248:                                     st.error(
+1249:                                         f"Failed to save keywords: {
+1250:                                             type(save_err).__name__}: {save_err}")
+1251:                     else:
+1252:                         st.error(
+1253:                             "No keywords were generated. Please try again with different text."
+1254:                         )
+1255:             except Exception as e:
+1256:                 st.error(f"Error: {str(e)}")
+1257:             finally:
+1258:                 st.session_state.keywords_running = False
+1259:     try:
+1260:         project_dir = Path(den.project_dir)
+1261:         md_path = project_dir / "input_files" / "keywords_selected.md"
+1262:         seed_csv = st.session_state.get("accepted_keywords", "")
+1263:         if not seed_csv:
+1264:             gen_kw = st.session_state.get('generated_keywords') or {}
+1265:             if isinstance(gen_kw, dict) and gen_kw:
+1266:                 seed_csv = ", ".join(list(gen_kw.keys()))
+1267:         if not seed_csv and md_path.exists():
+1268:             try:
+1269:                 content = md_path.read_text(encoding='utf-8')
+1270:                 seed_csv = content.split(
+1271:                     ":", 1)[1].strip() if ":" in content else content.strip()
+1272:             except Exception:
+1273:                 seed_csv = ""
+1274:         if seed_csv:
+1275:             st.markdown("---")
+1276:             st.write("Review and edit keywords (comma-separated).")
+1277:             with st.form("keywords_review_form"):
+1278:                 edited_csv = st.text_area(
+1279:                     "Edit keywords",
+1280:                     value=seed_csv,
+1281:                     height=120,
+1282:                     key="editable_keywords_review",
+1283:                 )
+1284:                 submitted = st.form_submit_button("Accept keywords")
+1285:                 if submitted:
+1286:                     edited_list = [k.strip()
+1287:                                    for k in edited_csv.split(",") if k.strip()]
+1288:                     try:
+1289:                         out_dir = project_dir / "input_files"
+1290:                         out_dir.mkdir(parents=True, exist_ok=True)
+1291:                         out_path = out_dir / "keywords_selected.md"
+1292:                         with open(out_path, "w", encoding="utf-8") as f:
+1293:                             f.write(
+1294:                                 "Keywords: " + ", ".join(edited_list) + "\n")
+1295:                         paper_temp_dir = project_dir / "paper" / "temp"
+1296:                         paper_temp_dir.mkdir(parents=True, exist_ok=True)
+1297:                         keywords_tex = paper_temp_dir / "Keywords.tex"
+1298:                         _kw = ", ".join(edited_list)
+1299:                         _latex_doc = (
+1300:                             "\\documentclass{article}\n"
+1301:                             "\\usepackage{amsmath}\n"
+1302:                             "\\begin{document}\n"
+1303:                             f"{_kw}\n"
+1304:                             "\\end{document}\n"
+1305:                         )
+1306:                         with open(keywords_tex, "w", encoding="utf-8") as f:
+1307:                             f.write(_latex_doc)
+1308:                         md_ok = out_path.exists() and out_path.stat().st_size > 0
+1309:                         tex_ok = keywords_tex.exists() and keywords_tex.stat().st_size > 0
+1310:                         st.session_state["accepted_keywords"] = ", ".join(
+1311:                             edited_list)
+1312:                         if md_ok and tex_ok:
+1313:                             st.success(
+1314:                                 f"Saved reviewed keywords to {out_path} and {keywords_tex}")
+1315:                             try:
+1316:                                 saved_kw = keywords_tex.read_text(
+1317:                                     encoding="utf-8").strip()
+1318:                                 st.caption(
+1319:                                     "Saved Keywords (paper/temp/Keywords.tex):")
+1320:                                 st.code(saved_kw, language='latex')
+1321:                             except Exception as preview_err:
+1322:                                 st.info(
+1323:                                     f"Keywords saved, but preview unavailable: {preview_err}")
+1324:                         else:
+1325:                             st.error(
+1326:                                 f"Keywords not fully saved. Exists: md={md_ok}, tex={tex_ok}.")
+1327:                     except Exception as save_err:
+1328:                         st.error(
+1329:                             f"Failed to save keywords: {
+1330:                                 type(save_err).__name__}: {save_err}")
+1331:     except Exception:
+1332:         pass
+1333: def wolfram_hitl_review_comp():
+1334:     st.subheader("🔍 Wolfram Alpha Review")
+1335:     st.write("Review ambiguous mathematical results that need human input.")
+1336:     if 'wolfram_hitl_queue' not in st.session_state:
+1337:         st.session_state.wolfram_hitl_queue = []
+1338:     if 'wolfram_hitl_responses' not in st.session_state:
+1339:         st.session_state.wolfram_hitl_responses = {}
+1340:     if st.session_state.wolfram_hitl_queue:
+1341:         st.write(
+1342:             f"**{len(st.session_state.wolfram_hitl_queue)} pending reviews**")
+1343:         for i, review_item in enumerate(st.session_state.wolfram_hitl_queue):
+1344:             with st.expander(f"Review {i + 1}: {review_item.get('query', 'Unknown query')[:50]}...", expanded=True):
+1345:                 st.write(f"**Query:** {review_item['query']}")
+1346:                 if 'results' in review_item:
+1347:                     structured = review_item['results']
+1348:                     if structured.get('plaintext'):
+1349:                         st.write("**Plaintext Results:**")
+1350:                         for pt in structured['plaintext'][:3]:
+1351:                             st.code(pt)
+1352:                     if structured.get('latex'):
+1353:                         st.write("**LaTeX Results:**")
+1354:                         for latex in structured['latex'][:2]:
+1355:                             st.code(latex, language='latex')
+1356:                     if structured.get('assumptions'):
+1357:                         st.write("**Assumptions:**")
+1358:                         for assumption in structured['assumptions'][:2]:
+1359:                             st.write(f"- {assumption}")
+1360:                 col1, col2, col3 = st.columns(3)
+1361:                 with col1:
+1362:                     if st.button(f"✅ Approve {i + 1}", key=f"approve_{i}"):
+1363:                         st.session_state.wolfram_hitl_responses[review_item['id']] = {
+1364:                             'action': 'approve',
+1365:                             'selected_result': structured['plaintext'][0] if structured.get('plaintext') else None
+1366:                         }
+1367:                         st.session_state.wolfram_hitl_queue.pop(i)
+1368:                         st.rerun()
+1369:                 with col2:
+1370:                     if st.button(f"✏️ Edit {i + 1}", key=f"edit_{i}"):
+1371:                         st.session_state[f"editing_{i}"] = True
+1372:                 with col3:
+1373:                     if st.button(f"❌ Reject {i + 1}", key=f"reject_{i}"):
+1374:                         st.session_state.wolfram_hitl_responses[review_item['id']] = {
+1375:                             'action': 'reject', 'reason': 'User rejected'}
+1376:                         st.session_state.wolfram_hitl_queue.pop(i)
+1377:                         st.rerun()
+1378:                 if st.session_state.get(f"editing_{i}", False):
+1379:                     edited_result = st.text_area(
+1380:                         "Edit the result:",
+1381:                         value=structured['plaintext'][0] if structured.get('plaintext') else "",
+1382:                         key=f"edit_text_{i}")
+1383:                     col1, col2 = st.columns(2)
+1384:                     with col1:
+1385:                         if st.button(
+1386:                                 f"💾 Save Edit {
+1387:                                     i + 1}",
+1388:                                 key=f"save_edit_{i}"):
+1389:                             st.session_state.wolfram_hitl_responses[review_item['id']] = {
+1390:                                 'action': 'edit', 'edited_result': edited_result}
+1391:                             st.session_state.wolfram_hitl_queue.pop(i)
+1392:                             st.session_state[f"editing_{i}"] = False
+1393:                             st.rerun()
+1394:                     with col2:
+1395:                         if st.button(
+1396:                                 f"❌ Cancel Edit {
+1397:                                     i + 1}",
+1398:                                 key=f"cancel_edit_{i}"):
+1399:                             st.session_state[f"editing_{i}"] = False
+1400:                             st.rerun()
+1401:     else:
+1402:         st.info("No pending Wolfram Alpha reviews.")
+1403:     st.subheader("🧪 Test Wolfram Alpha")
+1404:     test_query = st.text_input(
+1405:         "Test query:",
+1406:         value="integrate x^2 from 0 to 1")
+1407:     if st.button("Test Query"):
+1408:         try:
+1409:             client = WolframAlphaClient(enable_hitl=True)
+1410:             result = client.query(test_query)
+1411:             if result.get("queryresult", {}).get("success"):
+1412:                 primary_text = WolframAlphaClient.extract_primary_text(result)
+1413:                 structured = WolframAlphaClient.extract_structured_results(
+1414:                     result)
+1415:                 st.success("Query successful!")
+1416:                 st.write(f"**Result:** {primary_text}")
+1417:                 if structured.get('latex'):
+1418:                     st.write("**LaTeX:**")
+1419:                     st.code(structured['latex'][0], language='latex')
+1420:                 if client.needs_hitl_review(result):
+1421:                     st.warning("This result needs human review!")
+1422:                     hitl_prompt = client.get_hitl_prompt(test_query, result)
+1423:                     st.text_area("HITL Prompt:", value=hitl_prompt, height=100)
+1424:             else:
+1425:                 st.error("Query failed")
+1426:         except Exception as e:
+1427:             st.error(f"Error: {str(e)}")
+1428: def add_wolfram_hitl_to_queue(
+1429:         query: str,
+1430:         wa_json: dict,
+1431:         review_id: str = None):
+1432:     if review_id is None:
+1433:         import uuid
+1434:         review_id = str(uuid.uuid4())
+1435:     structured = WolframAlphaClient.extract_structured_results(wa_json)
+1436:     review_item = {
+1437:         'id': review_id,
+1438:         'query': query,
+1439:         'results': structured,
+1440:         'timestamp': st.session_state.get('current_time', 'unknown')
+1441:     }
+1442:     if 'wolfram_hitl_queue' not in st.session_state:
+1443:         st.session_state.wolfram_hitl_queue = []
+1444:     st.session_state.wolfram_hitl_queue.append(review_item)
+</file>
+
+<file path="denario_app/constants.py">
+1: PROJECT_DIR = "project_app"
+2: LLMs = ["GEMINI", "OPENAI", "ANTHROPIC", "PERPLEXITY"]
+3: RAG_PROVIDERS = [
+4:     "Perplexity (web)",
+5:     "Domain (Planck/CAMB/CLASSY)",
+6:     "GraphRAG (local corpus)",
+7:     "arXiv (academic papers)",
+8: ]
+</file>
+
+<file path="denario_app/graphrag.py">
+  1: import os
+  2: import json
+  3: import logging
+  4: from pathlib import Path
+  5: from typing import List, Dict, Any, Optional
+  6: import hashlib
+  7: import re
+  8: logger = logging.getLogger(__name__)
+  9: class GraphRAGIndexer:
+ 10:     def __init__(self, corpus_path: str = "/data/cmbagents/ragbook",
+ 11:                  index_path: str = "/data/cmbagents/ragbook/graphrag_index"):
+ 12:         self.corpus_path = Path(corpus_path)
+ 13:         self.index_path = Path(index_path)
+ 14:         self.index_path.mkdir(exist_ok=True)
+ 15:         self.documents_file = self.index_path / "documents.json"
+ 16:         self.entities_file = self.index_path / "entities.json"
+ 17:         self.relationships_file = self.index_path / "relationships.json"
+ 18:         self.documents = self._load_json(self.documents_file, {})
+ 19:         self.entities = self._load_json(self.entities_file, {})
+ 20:         self.relationships = self._load_json(self.relationships_file, {})
+ 21:     def _load_json(self, file_path: Path, default: Any) -> Any:
+ 22:         try:
+ 23:             if file_path.exists():
+ 24:                 with open(file_path, 'r', encoding='utf-8') as f:
+ 25:                     return json.load(f)
+ 26:         except Exception as e:
+ 27:             logger.warning(f"Failed to load {file_path}: {e}")
+ 28:         return default
+ 29:     def _save_json(self, data: Any, file_path: Path) -> None:
+ 30:         try:
+ 31:             with open(file_path, 'w', encoding='utf-8') as f:
+ 32:                 json.dump(data, f, indent=2, ensure_ascii=False)
+ 33:         except Exception as e:
+ 34:             logger.error(f"Failed to save {file_path}: {e}")
+ 35:     def _extract_entities(self, text: str) -> List[str]:
+ 36:         entities = []
+ 37:         doi_pattern = r'10\.\d{4,9}/[-._;()/:A-Za-z0-9]+'
+ 38:         dois = re.findall(doi_pattern, text)
+ 39:         entities.extend([f"doi:{doi}" for doi in dois])
+ 40:         arxiv_pattern = r'\d{4}\.\d{4,5}(?:v\d+)?'
+ 41:         arxiv_ids = re.findall(arxiv_pattern, text)
+ 42:         entities.extend([f"arxiv:{arxiv_id}" for arxiv_id in arxiv_ids])
+ 43:         author_pattern = r'\b[A-Z][a-z]+ [A-Z][a-z]+\b'
+ 44:         authors = re.findall(author_pattern, text)
+ 45:         entities.extend([f"author:{author}" for author in authors[:10]])
+ 46:         tech_terms = [
+ 47:             'cosmology', 'CMB', 'Planck', 'CAMB', 'CLASS', 'CLASSY',
+ 48:             'dark matter', 'dark energy', 'baryon acoustic oscillations',
+ 49:             'redshift', 'luminosity distance', 'angular diameter distance',
+ 50:             'power spectrum', 'correlation function', 'galaxy clustering',
+ 51:             'weak lensing', 'strong lensing', 'gravitational waves',
+ 52:             'inflation', 'reionization', 'baryogenesis'
+ 53:         ]
+ 54:         for term in tech_terms:
+ 55:             if term.lower() in text.lower():
+ 56:                 entities.append(f"concept:{term}")
+ 57:         return list(set(entities))
+ 58:     def _extract_relationships(
+ 59:             self, text: str, entities: List[str]) -> List[Dict[str, str]]:
+ 60:         relationships = []
+ 61:         for i, entity1 in enumerate(entities):
+ 62:             for entity2 in entities[i + 1:]:
+ 63:                 if self._entities_co_occur(text, entity1, entity2):
+ 64:                     relationships.append({
+ 65:                         "source": entity1,
+ 66:                         "target": entity2,
+ 67:                         "type": "co_occurs_with",
+ 68:                         "strength": 1.0
+ 69:                     })
+ 70:         return relationships
+ 71:     def _entities_co_occur(
+ 72:             self,
+ 73:             text: str,
+ 74:             entity1: str,
+ 75:             entity2: str) -> bool:
+ 76:         term1 = entity1.split(':', 1)[1] if ':' in entity1 else entity1
+ 77:         term2 = entity2.split(':', 1)[1] if ':' in entity2 else entity2
+ 78:         sentences = re.split(r'[.!?]+', text)
+ 79:         for sentence in sentences:
+ 80:             if term1.lower() in sentence.lower() and term2.lower() in sentence.lower():
+ 81:                 return True
+ 82:         for i in range(len(text) - 100):
+ 83:             chunk = text[i:i + 100]
+ 84:             if term1.lower() in chunk.lower() and term2.lower() in chunk.lower():
+ 85:                 return True
+ 86:         return False
+ 87:     def _process_document(self, file_path: Path) -> Dict[str, Any]:
+ 88:         try:
+ 89:             with open(file_path, 'r', encoding='utf-8') as f:
+ 90:                 content = f.read()
+ 91:         except Exception as e:
+ 92:             logger.warning(f"Failed to read {file_path}: {e}")
+ 93:             return None
+ 94:         doc_id = hashlib.md5(str(file_path).encode()).hexdigest()[:16]
+ 95:         entities = self._extract_entities(content)
+ 96:         relationships = self._extract_relationships(content, entities)
+ 97:         document = {
+ 98:             "id": doc_id,
+ 99:             "path": str(file_path),
+100:             "filename": file_path.name,
+101:             "content": content[:1000],
+102:             "entities": entities,
+103:             "relationships": relationships,
+104:             "size": len(content),
+105:             "type": file_path.suffix
+106:         }
+107:         return document
+108:     def index_corpus(self, force_rebuild: bool = False) -> Dict[str, Any]:
+109:         if not force_rebuild and self.documents:
+110:             logger.info("Index already exists, skipping rebuild")
+111:             return {"status": "skipped", "documents": len(self.documents)}
+112:         logger.info(f"Indexing corpus at {self.corpus_path}")
+113:         file_patterns = ['*.jsonl', '*.md', '*.tex', '*.txt']
+114:         files_to_process = []
+115:         for pattern in file_patterns:
+116:             files_to_process.extend(self.corpus_path.rglob(pattern))
+117:         files_to_process = [
+118:             f for f in files_to_process
+119:             if f.stat().st_size < 10 * 1024 * 1024 and
+120:             not any(part.startswith('.') for part in f.parts) and
+121:             not f.name.startswith('.')
+122:         ]
+123:         logger.info(f"Found {len(files_to_process)} files to process")
+124:         new_documents = {}
+125:         all_entities = {}
+126:         all_relationships = []
+127:         for file_path in files_to_process:
+128:             doc = self._process_document(file_path)
+129:             if doc:
+130:                 new_documents[doc["id"]] = doc
+131:                 for entity in doc["entities"]:
+132:                     if entity not in all_entities:
+133:                         all_entities[entity] = []
+134:                     all_entities[entity].append(doc["id"])
+135:                 all_relationships.extend(doc["relationships"])
+136:         self.documents = new_documents
+137:         self.entities = all_entities
+138:         self.relationships = all_relationships
+139:         self._save_json(self.documents, self.documents_file)
+140:         self._save_json(self.entities, self.entities_file)
+141:         self._save_json(self.relationships, self.relationships_file)
+142:         logger.info(
+143:             f"Indexed {
+144:                 len(new_documents)} documents, {
+145:                 len(all_entities)} entities, {
+146:                 len(all_relationships)} relationships")
+147:         return {
+148:             "status": "success",
+149:             "documents": len(new_documents),
+150:             "entities": len(all_entities),
+151:             "relationships": len(all_relationships)
+152:         }
+153:     def search(self, query: str,
+154:                max_results: int = 10) -> List[Dict[str, Any]]:
+155:         if not self.documents:
+156:             logger.warning("No documents indexed, run index_corpus() first")
+157:             return []
+158:         query_lower = query.lower()
+159:         results = []
+160:         for doc_id, doc in self.documents.items():
+161:             score = 0
+162:             if query_lower in doc["content"].lower():
+163:                 score += 2
+164:             for entity in doc["entities"]:
+165:                 if query_lower in entity.lower():
+166:                     score += 1
+167:             if query_lower in doc["filename"].lower():
+168:                 score += 1
+169:             if score > 0:
+170:                 results.append({
+171:                     "document": doc,
+172:                     "score": score,
+173:                     "matches": self._get_match_context(doc, query)
+174:                 })
+175:         results.sort(key=lambda x: x["score"], reverse=True)
+176:         return results[:max_results]
+177:     def _get_match_context(self, doc: Dict[str, Any], query: str) -> List[str]:
+178:         content = doc["content"]
+179:         query_lower = query.lower()
+180:         matches = []
+181:         start = 0
+182:         while True:
+183:             pos = content.lower().find(query_lower, start)
+184:             if pos == -1:
+185:                 break
+186:             context_start = max(0, pos - 100)
+187:             context_end = min(len(content), pos + len(query) + 100)
+188:             context = content[context_start:context_end]
+189:             matches.append(context.strip())
+190:             start = pos + 1
+191:             if len(matches) >= 3:
+192:                 break
+193:         return matches
+194:     def get_entity_info(self, entity: str) -> Dict[str, Any]:
+195:         if entity not in self.entities:
+196:             return {"entity": entity, "documents": [], "relationships": []}
+197:         doc_ids = self.entities[entity]
+198:         documents = [self.documents[doc_id]
+199:                      for doc_id in doc_ids if doc_id in self.documents]
+200:         entity_relationships = [
+201:             rel for rel in self.relationships
+202:             if rel["source"] == entity or rel["target"] == entity
+203:         ]
+204:         return {
+205:             "entity": entity,
+206:             "documents": documents,
+207:             "relationships": entity_relationships,
+208:             "document_count": len(documents)
+209:         }
+210: class GraphRAGRetriever:
+211:     def __init__(self, indexer: Optional[GraphRAGIndexer] = None):
+212:         self.indexer = indexer or GraphRAGIndexer()
+213:         self._ensure_indexed()
+214:     def _ensure_indexed(self):
+215:         if not self.indexer.documents:
+216:             logger.info("No index found, building GraphRAG index...")
+217:             self.indexer.index_corpus()
+218:     def retrieve(self, query: str,
+219:                  max_results: int = 5) -> List[Dict[str, Any]]:
+220:         results = self.indexer.search(query, max_results)
+221:         formatted_results = []
+222:         for result in results:
+223:             doc = result["document"]
+224:             formatted_results.append({
+225:                 "title": doc["filename"],
+226:                 "url": f"file://{doc['path']}",
+227:                 "doi": None,
+228:                 "content": doc["content"],
+229:                 "score": result["score"],
+230:                 "matches": result["matches"],
+231:                 "entities": doc["entities"][:5],
+232:                 "type": "local_corpus"
+233:             })
+234:         return formatted_results
+235:     def get_corpus_stats(self) -> Dict[str, Any]:
+236:         return {
+237:             "documents": len(self.indexer.documents),
+238:             "entities": len(self.indexer.entities),
+239:             "relationships": len(self.indexer.relationships),
+240:             "corpus_path": str(self.indexer.corpus_path)
+241:         }
+242: _graphrag_retriever = None
+243: def get_graphrag_retriever() -> GraphRAGRetriever:
+244:     global _graphrag_retriever
+245:     if _graphrag_retriever is None:
+246:         _graphrag_retriever = GraphRAGRetriever()
+247:     return _graphrag_retriever
+</file>
+
+<file path="denario_app/preflight.py">
+  1: import os
+  2: import sys
+  3: import json
+  4: import socket
+  5: import importlib.util
+  6: from typing import Dict, Any, List
+  7: from urllib.request import urlopen
+  8: from urllib.error import URLError
+  9: import subprocess
+ 10: def _load_env_file(path: str) -> None:
+ 11:     if not os.path.exists(path):
+ 12:         return
+ 13:     try:
+ 14:         with open(path, 'r') as f:
+ 15:             for line in f:
+ 16:                 line = line.strip()
+ 17:                 if not line or line.startswith('#'):
+ 18:                     continue
+ 19:                 if '=' not in line:
+ 20:                     continue
+ 21:                 key, val = line.split('=', 1)
+ 22:                 key = key.strip()
+ 23:                 val = val.strip().strip('"').strip("'")
+ 24:                 if key and key not in os.environ:
+ 25:                     os.environ[key] = val
+ 26:     except Exception:
+ 27:         pass
+ 28: def check_module(name: str) -> str:
+ 29:     return "ok" if importlib.util.find_spec(name) is not None else "missing"
+ 30: def port_free(port: int) -> bool:
+ 31:     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+ 32:         s.settimeout(0.5)
+ 33:         return s.connect_ex(("127.0.0.1", port)) != 0
+ 34: def ui_health_ok(port: int, timeout_sec: float = 1.0) -> bool:
+ 35:     try:
+ 36:         with urlopen(f"http://127.0.0.1:{port}/_stcore/health", timeout=timeout_sec) as resp:
+ 37:             body = resp.read().decode("utf-8", errors="ignore").strip()
+ 38:             return resp.status == 200 and body == "ok"
+ 39:     except Exception:
+ 40:         return False
+ 41: def run_checks() -> Dict[str, Any]:
+ 42:     app_root = os.path.abspath(
+ 43:         os.path.join(
+ 44:             os.path.dirname(__file__),
+ 45:             '..',
+ 46:             '..'))
+ 47:     _load_env_file(os.path.join(app_root, '.env'))
+ 48:     # CONDA_DEFAULT_ENV or interpreter path)
+ 49:     conda_env = os.environ.get("CONDA_DEFAULT_ENV", "")
+ 50:     interpreter_path = sys.executable
+ 51:     is_cmbagent_env = (conda_env == "cmbagent" or
+ 52:                        "/opt/miniforge/envs/cmbagent/bin/python" in interpreter_path)
+ 53:     results: Dict[str, Any] = {
+ 54:         "env": {
+ 55:             "CONDA_DEFAULT_ENV": conda_env,
+ 56:             "interpreter_path": interpreter_path,
+ 57:             "ok": is_cmbagent_env,
+ 58:         },
+ 59:         "modules": {
+ 60:             "streamlit": check_module("streamlit"),
+ 61:             "denario": check_module("denario"),
+ 62:             "streamlit_pdf_viewer": check_module("streamlit_pdf_viewer"),
+ 63:             "PIL": check_module("PIL"),
+ 64:         },
+ 65:         "imports": {},
+ 66:         "network": {},
+ 67:         "matlab": {},
+ 68:         "summary": {"errors": []},
+ 69:     }
+ 70:     # Import details when present
+ 71:     if results["modules"]["denario"] == "ok":
+ 72:         try:
+ 73:             import denario  # type: ignore
+ 74:             results["imports"]["denario_path"] = getattr(
+ 75:                 denario, "__file__", "?")
+ 76:         except Exception as e:  # pragma: no cover
+ 77:             results["imports"]["denario_error"] = str(e)
+ 78:             results["summary"]["errors"].append(f"denario import failed: {e}")
+ 79:     if results["modules"]["streamlit"] == "ok":
+ 80:         try:
+ 81:             import streamlit  # noqa: F401  # type: ignore
+ 82:         except Exception as e:  # pragma: no cover
+ 83:             results["imports"]["streamlit_error"] = str(e)
+ 84:             results["summary"]["errors"].append(
+ 85:                 f"streamlit import failed: {e}")
+ 86:     # Ensure Streamlit port is free by default (canonical 8501)
+ 87:     default_port = int(os.environ.get("DENARIOAPP_PORT", "8501"))
+ 88:     free = port_free(default_port)
+ 89:     results["network"]["port_free"] = {"port": default_port, "free": free}
+ 90:     if not free:
+ 91:         results["summary"]["errors"].append(
+ 92:             f"port {default_port} is already in use")
+ 93:     # If default port is busy, consider alternate known ports and pass if any
+ 94:     # UI is healthy
+ 95:     candidate_ports: List[int] = [default_port]
+ 96:     if default_port != 8511:
+ 97:         candidate_ports.append(8511)
+ 98:     healthy_port: int = -1
+ 99:     for p in candidate_ports:
+100:         if not port_free(p) and ui_health_ok(p):
+101:             healthy_port = p
+102:             break
+103:     if healthy_port != -1:
+104:         results["network"]["ui_health_tcp"] = {
+105:             "port": healthy_port, "ok": True}
+106:         # Remove port-in-use error if present, since a healthy UI is already
+107:         # running
+108:         try:
+109:             results["summary"]["errors"].remove(
+110:                 f"port {default_port} is already in use")
+111:         except ValueError:
+112:             pass
+113:     # Basic keys presence (warn-only unless user enables strict)
+114:     keys: List[str] = [
+115:         "OPENAI_API_KEY",
+116:         "ANTHROPIC_API_KEY",
+117:         "GEMINI_API_KEY",
+118:         "PERPLEXITY_API_KEY",
+119:     ]
+120:     missing_keys = [k for k in keys if not os.environ.get(k)]
+121:     results["keys"] = {"required_checked": keys, "missing": missing_keys}
+122:     # Summarize errors
+123:     if not results["env"]["ok"]:
+124:         results["summary"]["errors"].append(
+125:             "Not in required conda env: cmbagent (set CONDA_DEFAULT_ENV=cmbagent)"
+126:         )
+127:     for mod, status in results["modules"].items():
+128:         if status != "ok":
+129:             results["summary"]["errors"].append(f"missing module: {mod}")
+130:     # MATLAB docker probe (optional)
+131:     try:
+132:         results["matlab"] = _probe_matlab_docker()
+133:     except Exception:  # pragma: no cover
+134:         results["matlab"] = {"enabled": False}
+135:     # Optional strict mode to enforce keys as errors
+136:     if os.environ.get(
+137:             "DENARIOAPP_STRICT_KEYS") == "1" and results["keys"]["missing"]:
+138:         results["summary"]["errors"].append(
+139:             f"missing required API keys: {results['keys']['missing']}"
+140:         )
+141:     results["summary"]["ok"] = len(results["summary"]["errors"]) == 0
+142:     return results
+143: def _probe_matlab_docker() -> Dict[str, Any]:
+144:     info: Dict[str, Any] = {"ok": False}
+145:     container = os.environ.get("MATLAB_DOCKER_CONTAINER", "matlab_r2025a")
+146:     backend = os.environ.get("MATLAB_BACKEND", "")
+147:     if backend != "docker":
+148:         return {"enabled": False}
+149:     info["enabled"] = True
+150:     info["container"] = container
+151:     # Quick container liveness check
+152:     try:
+153:         ps = subprocess.run(
+154:             ["docker", "ps", "--format", "{{.Names}}"],
+155:             stdout=subprocess.PIPE,
+156:             stderr=subprocess.PIPE,
+157:             text=True,
+158:             timeout=2,
+159:         )
+160:         names = ps.stdout.strip().splitlines()
+161:         info["running"] = container in names
+162:         if not info["running"]:
+163:             return info
+164:     except Exception:
+165:         info["error"] = "docker not available"
+166:         return info
+167:     # Prefer single JSON report from capability_report.m
+168:     try:
+169:         rep = subprocess.run([
+170:             'docker','exec',container,'matlab','-batch','capability_report'
+171:         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=20)
+172:         if rep.returncode == 0 and rep.stdout.strip().startswith('{'):
+173:             info['capabilities'] = json.loads(rep.stdout.strip())
+174:             info['ok'] = True
+175:             return info
+176:         else:
+177:             info['stderr'] = rep.stderr.strip()
+178:     except Exception as e:
+179:         info['error'] = str(e)
+180:     info['ok'] = True
+181:     return info
+182: def main() -> None:
+183:     as_json = "--json" in sys.argv
+184:     results = run_checks()
+185:     if as_json:
+186:         print(json.dumps(results, indent=2))
+187:     else:
+188:         print(f"env: {results['env']}")
+189:         print(f"modules: {results['modules']}")
+190:         print(f"imports: {results['imports']}")
+191:         print(f"network: {results['network']}")
+192:         if results["keys"]["missing"]:
+193:             print(f"warn: missing keys: {results['keys']['missing']}")
+194:         if results["summary"]["errors"]:
+195:             print("errors:")
+196:             for e in results["summary"]["errors"]:
+197:                 print(f" - {e}")
+198:     sys.exit(0 if results["summary"]["ok"] else 1)
+199: if __name__ == "__main__":
+200:     main()
+</file>
+
+<file path="denario_app/rag_adapter.py">
+  1: import os
+  2: import logging
+  3: from abc import ABC, abstractmethod
+  4: from typing import List, Dict, Any, Optional, Union
+  5: from enum import Enum
+  6: from dataclasses import dataclass
+  7: logger = logging.getLogger(__name__)
+  8: class RAGProvider(Enum):
+  9:     PERPLEXITY = "Perplexity (web)"
+ 10:     DOMAIN = "Domain (Planck/CAMB/CLASSY)"
+ 11:     GRAPHRAG = "GraphRAG (local corpus)"
+ 12:     ARXIV = "arXiv (academic papers)"
+ 13: @dataclass
+ 14: class RetrievalResult:
+ 15:     title: str
+ 16:     url: str
+ 17:     doi: Optional[str] = None
+ 18:     content: str = ""
+ 19:     score: float = 0.0
+ 20:     provider: str = ""
+ 21:     metadata: Dict[str, Any] = None
+ 22:     def __post_init__(self):
+ 23:         if self.metadata is None:
+ 24:             self.metadata = {}
+ 25: class RAGAdapter(ABC):
+ 26:     @abstractmethod
+ 27:     def retrieve(
+ 28:             self,
+ 29:             query: str,
+ 30:             max_results: int = 5) -> List[RetrievalResult]:
+ 31:         pass
+ 32:     @abstractmethod
+ 33:     def is_available(self) -> bool:
+ 34:         pass
+ 35:     @abstractmethod
+ 36:     def get_provider_name(self) -> str:
+ 37:         pass
+ 38: class PerplexityAdapter(RAGAdapter):
+ 39:     def __init__(self):
+ 40:         self.provider_name = RAGProvider.PERPLEXITY.value
+ 41:         self.api_key = os.getenv("PERPLEXITY_API_KEY")
+ 42:     def is_available(self) -> bool:
+ 43:         return self.api_key is not None
+ 44:     def get_provider_name(self) -> str:
+ 45:         return self.provider_name
+ 46:     def retrieve(
+ 47:             self,
+ 48:             query: str,
+ 49:             max_results: int = 5) -> List[RetrievalResult]:
+ 50:         if not self.is_available():
+ 51:             logger.warning("Perplexity API key not available, using fallback")
+ 52:             return self._fallback_retrieve(query, max_results)
+ 53:         try:
+ 54:             return self._fallback_retrieve(query, max_results)
+ 55:         except Exception as e:
+ 56:             logger.error(f"Perplexity retrieval failed: {e}")
+ 57:             return self._fallback_retrieve(query, max_results)
+ 58:     def _fallback_retrieve(
+ 59:             self,
+ 60:             query: str,
+ 61:             max_results: int) -> List[RetrievalResult]:
+ 62:         return [
+ 63:             RetrievalResult(
+ 64:                 title="Web Search Fallback",
+ 65:                 url="https://perplexity.ai",
+ 66:                 content=f"Perplexity search for: {query}",
+ 67:                 score=1.0,
+ 68:                 provider=self.provider_name,
+ 69:                 metadata={"fallback": True, "query": query}
+ 70:             )
+ 71:         ]
+ 72: class DomainAdapter(RAGAdapter):
+ 73:     def __init__(self):
+ 74:         self.provider_name = RAGProvider.DOMAIN.value
+ 75:     def is_available(self) -> bool:
+ 76:         return True
+ 77:     def get_provider_name(self) -> str:
+ 78:         return self.provider_name
+ 79:     def retrieve(
+ 80:             self,
+ 81:             query: str,
+ 82:             max_results: int = 5) -> List[RetrievalResult]:
+ 83:         domain_contexts = self._get_domain_contexts()
+ 84:         results = []
+ 85:         for context in domain_contexts[:max_results]:
+ 86:             results.append(RetrievalResult(
+ 87:                 title=context["title"],
+ 88:                 url=context["url"],
+ 89:                 content=context["content"],
+ 90:                 score=1.0,
+ 91:                 provider=self.provider_name,
+ 92:                 metadata=context.get("metadata", {})
+ 93:             ))
+ 94:         return results
+ 95:     def _get_domain_contexts(self) -> List[Dict[str, Any]]:
+ 96:         return [{"title": "Planck Mission Context",
+ 97:                  "url": "https://www.cosmos.esa.int/web/planck",
+ 98:                  "content": """Planck 2018 results: cosmological parameters from CMB temperature and polarization
+ 99: - Key datasets: Planck 2018 TT,TE,EE+lowE+lensing+BAO
+100: - Relevant parameters: H0, Ωm, ΩΛ, ns, As, τ
+101: - Recent constraints: H0 = 67.4 ± 0.5 km/s/Mpc (Planck 2018)
+102: - Lensing potential: Planck lensing reconstruction
+103: - Systematics: foreground contamination, beam uncertainties""",
+104:                  "metadata": {"domain": "planck",
+105:                               "type": "mission_context"}},
+106:                 {"title": "CAMB (Code for Anisotropies in the Microwave Background)",
+107:                  "url": "https://camb.readthedocs.io/",
+108:                  "content": """Boltzmann solver for CMB anisotropies and matter power spectra
+109: - Key features: scalar, vector, tensor modes; dark energy models
+110: - Recent updates: CAMB 1.3+ with improved precision
+111: - Applications: parameter estimation, likelihood analysis
+112: - Integration: CosmoMC, MontePython, Cobaya
+113: - Outputs: Cl, P(k), transfer functions""",
+114:                  "metadata": {"domain": "camb",
+115:                               "type": "tool_context"}},
+116:                 {"title": "CLASSY (Cosmic Linear Anisotropy Solving System)",
+117:                  "url": "https://class-code.net/",
+118:                  "content": """Alternative to CAMB for CMB and LSS calculations
+119: - Features: high precision, modular design, dark energy models
+120: - Recent work: CLASSY-SZ for Sunyaev-Zel'dovich effects
+121: - Applications: parameter estimation, model comparison
+122: - Integration: MontePython, Cobaya
+123: - Advantages: speed, flexibility, extended models""",
+124:                  "metadata": {"domain": "classy",
+125:                               "type": "tool_context"}}]
+126: class GraphRAGAdapter(RAGAdapter):
+127:     def __init__(self):
+128:         self.provider_name = RAGProvider.GRAPHRAG.value
+129:         self._retriever = None
+130:     def is_available(self) -> bool:
+131:         try:
+132:             from .graphrag import get_graphrag_retriever
+133:             return True
+134:         except ImportError:
+135:             return False
+136:     def get_provider_name(self) -> str:
+137:         return self.provider_name
+138:     def retrieve(
+139:             self,
+140:             query: str,
+141:             max_results: int = 5) -> List[RetrievalResult]:
+142:         if not self.is_available():
+143:             logger.warning("GraphRAG not available")
+144:             return []
+145:         try:
+146:             if self._retriever is None:
+147:                 from .graphrag import get_graphrag_retriever
+148:                 self._retriever = get_graphrag_retriever()
+149:             results = self._retriever.retrieve(query, max_results)
+150:             retrieval_results = []
+151:             for result in results:
+152:                 retrieval_results.append(RetrievalResult(
+153:                     title=result["title"],
+154:                     url=result["url"],
+155:                     doi=result.get("doi"),
+156:                     content=result["content"],
+157:                     score=result.get("score", 0.0),
+158:                     provider=self.provider_name,
+159:                     metadata=result.get("metadata", {})
+160:                 ))
+161:             return retrieval_results
+162:         except Exception as e:
+163:             logger.error(f"GraphRAG retrieval failed: {e}")
+164:             return []
+165:     def get_corpus_stats(self) -> Dict[str, Any]:
+166:         if not self.is_available() or self._retriever is None:
+167:             return {"documents": 0, "entities": 0, "relationships": 0}
+168:         try:
+169:             return self._retriever.get_corpus_stats()
+170:         except Exception as e:
+171:             logger.error(f"Failed to get corpus stats: {e}")
+172:             return {"documents": 0, "entities": 0, "relationships": 0}
+173: class ArxivAdapter(RAGAdapter):
+174:     def __init__(self):
+175:         self.provider_name = RAGProvider.ARXIV.value
+176:         self._retriever = None
+177:     def is_available(self) -> bool:
+178:         try:
+179:             from .arxiv_rag import get_arxiv_retriever
+180:             return True
+181:         except ImportError:
+182:             return False
+183:     def get_provider_name(self) -> str:
+184:         return self.provider_name
+185:     def retrieve(
+186:             self,
+187:             query: str,
+188:             max_results: int = 5) -> List[RetrievalResult]:
+189:         if not self.is_available():
+190:             logger.warning("arXiv adapter not available")
+191:             return []
+192:         try:
+193:             if self._retriever is None:
+194:                 from .arxiv_rag import get_arxiv_retriever
+195:                 self._retriever = get_arxiv_retriever()
+196:             results = self._retriever.retrieve(query, max_results)
+197:             retrieval_results = []
+198:             for result in results:
+199:                 retrieval_results.append(RetrievalResult(
+200:                     title=result["title"],
+201:                     url=result["url"],
+202:                     doi=result.get("doi"),
+203:                     content=result["content"],
+204:                     score=1.0,
+205:                     provider=self.provider_name,
+206:                     metadata={
+207:                         "authors": result.get("authors", []),
+208:                         "arxiv_id": result.get("arxiv_id"),
+209:                         "categories": result.get("categories", []),
+210:                         "published": result.get("published"),
+211:                         "type": "arxiv_paper"
+212:                     }
+213:                 ))
+214:             return retrieval_results
+215:         except Exception as e:
+216:             logger.error(f"arXiv retrieval failed: {e}")
+217:             return []
+218: class UnifiedRAGAdapter:
+219:     def __init__(self):
+220:         self.adapters = {
+221:             RAGProvider.PERPLEXITY: PerplexityAdapter(),
+222:             RAGProvider.DOMAIN: DomainAdapter(),
+223:             RAGProvider.GRAPHRAG: GraphRAGAdapter(),
+224:             RAGProvider.ARXIV: ArxivAdapter(),
+225:         }
+226:     def get_available_providers(self) -> List[RAGProvider]:
+227:         available = []
+228:         for provider, adapter in self.adapters.items():
+229:             if adapter.is_available():
+230:                 available.append(provider)
+231:         return available
+232:     def retrieve(self, query: str, provider: Union[RAGProvider, str],
+233:                  max_results: int = 5) -> List[RetrievalResult]:
+234:         if isinstance(provider, str):
+235:             # Convert string to enum
+236:             try:
+237:                 provider = RAGProvider(provider)
+238:             except ValueError:
+239:                 logger.error(f"Unknown provider: {provider}")
+240:                 return []
+241:         if provider not in self.adapters:
+242:             logger.error(f"Provider not configured: {provider}")
+243:             return []
+244:         adapter = self.adapters[provider]
+245:         if not adapter.is_available():
+246:             logger.warning(f"Provider {provider.value} not available")
+247:             return []
+248:         try:
+249:             return adapter.retrieve(query, max_results)
+250:         except Exception as e:
+251:             logger.error(f"Retrieval failed for {provider.value}: {e}")
+252:             return []
+253:     def retrieve_with_fallback(self,
+254:                                query: str,
+255:                                preferred_provider: Union[RAGProvider,
+256:                                                          str],
+257:                                max_results: int = 5) -> List[RetrievalResult]:
+258:         if isinstance(preferred_provider, str):
+259:             try:
+260:                 preferred_provider = RAGProvider(preferred_provider)
+261:             except ValueError:
+262:                 logger.error(f"Unknown provider: {preferred_provider}")
+263:                 return []
+264:         # Try preferred provider first
+265:         results = self.retrieve(query, preferred_provider, max_results)
+266:         if results:
+267:             return results
+268:         # Fallback to other available providers
+269:         available_providers = self.get_available_providers()
+270:         for provider in available_providers:
+271:             if provider != preferred_provider:
+272:                 results = self.retrieve(query, provider, max_results)
+273:                 if results:
+274:                     logger.info(f"Using fallback provider: {provider.value}")
+275:                     return results
+276:         logger.warning("All providers failed or unavailable")
+277:         return []
+278:     def get_provider_info(
+279:             self, provider: Union[RAGProvider, str]) -> Dict[str, Any]:
+280:         if isinstance(provider, str):
+281:             try:
+282:                 provider = RAGProvider(provider)
+283:             except ValueError:
+284:                 return {"error": f"Unknown provider: {provider}"}
+285:         if provider not in self.adapters:
+286:             return {"error": f"Provider not configured: {provider}"}
+287:         adapter = self.adapters[provider]
+288:         info = {
+289:             "name": adapter.get_provider_name(),
+290:             "available": adapter.is_available(),
+291:             "provider": provider.value
+292:         }
+293:         # Add provider-specific info
+294:         if provider == RAGProvider.GRAPHRAG and hasattr(
+295:                 adapter, 'get_corpus_stats'):
+296:             info["corpus_stats"] = adapter.get_corpus_stats()
+297:         return info
+298:     def get_all_provider_info(self) -> Dict[str, Dict[str, Any]]:
+299:         info = {}
+300:         for provider in RAGProvider:
+301:             info[provider.value] = self.get_provider_info(provider)
+302:         return info
+303: # Global instance for easy access
+304: _unified_adapter = None
+305: def get_unified_rag_adapter() -> UnifiedRAGAdapter:
+306:     global _unified_adapter
+307:     if _unified_adapter is None:
+308:         _unified_adapter = UnifiedRAGAdapter()
+309:     return _unified_adapter
+310: def format_results_for_ui(results: List[RetrievalResult]) -> str:
+311:     if not results:
+312:         return "No results found."
+313:     formatted = f"Found {len(results)} relevant documents:\n\n"
+314:     for i, result in enumerate(results, 1):
+315:         formatted += f"{i}. {result.title}\n"
+316:         if result.doi:
+317:             formatted += f"   DOI: https://doi.org/{result.doi}\n"
+318:         if result.url:
+319:             formatted += f"   URL: {result.url}\n"
+320:         if result.metadata.get("authors"):
+321:             authors = result.metadata["authors"][:3]
+322:             formatted += f"   Authors: {', '.join(authors)}"
+323:             if len(result.metadata["authors"]) > 3:
+324:                 formatted += f" et al. ({len(result.metadata['authors'])} total)"
+325:             formatted += "\n"
+326:         if result.metadata.get("categories"):
+327:             formatted += f"   Categories: {', '.join(result.metadata['categories'][:2])}\n"
+328:         if result.content:
+329:             content_preview = result.content[:200] + \
+330:                 "..." if len(result.content) > 200 else result.content
+331:             formatted += f"   Content: {content_preview}\n"
+332:         formatted += f"   Provider: {result.provider}\n"
+333:         formatted += "\n"
+334:     return formatted
+</file>
+
+<file path="denario_app/utils.py">
+  1: import os
+  2: import io
+  3: import zipfile
+  4: import re
+  5: import sys
+  6: import uuid
+  7: import shutil
+  8: import time
+  9: from contextlib import contextmanager
+ 10: import streamlit as st
+ 11: from denario import KeyManager
+ 12: try:
+ 13:     from .constants import PROJECT_DIR, LLMs
+ 14: except Exception:
+ 15:     from constants import PROJECT_DIR, LLMs
+ 16: def show_markdown_file(
+ 17:         file_path: str,
+ 18:         extra_format=False,
+ 19:         label: str = "") -> None:
+ 20:     with open(file_path, "r") as f:
+ 21:         response = f.read()
+ 22:     if extra_format:
+ 23:         response = response.replace(
+ 24:             "\nProject Idea:\n\t",
+ 25:             "### Project Idea\n").replace(
+ 26:             "\t\t",
+ 27:             "    ")
+ 28:     st.download_button(
+ 29:         label="Download " + label,
+ 30:         data=response,
+ 31:         file_name=file_path.replace(PROJECT_DIR + "/input_files/", ""),
+ 32:         mime="text/plain",
+ 33:         icon=":material/download:",
+ 34:     )
+ 35:     st.markdown(response)
+ 36: def extract_api_keys(uploaded_file):
+ 37:     pattern = re.compile(r'^\s*([A-Z_]+_API_KEY)\s*=\s*"([^"]+)"')
+ 38:     keys = {}
+ 39:     content = uploaded_file.read().decode("utf-8").split("\n")
+ 40:     for line in content:
+ 41:         match = pattern.match(line)
+ 42:         if match:
+ 43:             key_name, key_value = match.groups()
+ 44:             key_name = key_name.replace("_API_KEY", "")
+ 45:             if key_name in LLMs:
+ 46:                 keys[key_name] = key_value
+ 47:             if "GOOGLE" in key_name:
+ 48:                 keys["GEMINI"] = key_value
+ 49:     return keys
+ 50: def set_api_keys(key_manager: KeyManager, api_key: str, llm: str):
+ 51:     if llm == "GEMINI":
+ 52:         key_manager.GEMINI = api_key
+ 53:     elif llm == "OPENAI":
+ 54:         key_manager.OPENAI = api_key
+ 55:     elif llm == "ANTHROPIC":
+ 56:         key_manager.ANTHROPIC = api_key
+ 57:     elif llm == "PERPLEXITY":
+ 58:         key_manager.PERPLEXITY = api_key
+ 59: def create_zip_in_memory(folder_path: str):
+ 60:     zip_buffer = io.BytesIO()
+ 61:     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+ 62:         for root, _, files in os.walk(folder_path):
+ 63:             for file in files:
+ 64:                 file_path = os.path.join(root, file)
+ 65:                 arcname = os.path.relpath(file_path, folder_path)
+ 66:                 zip_file.write(file_path, arcname)
+ 67:     zip_buffer.seek(0)
+ 68:     return zip_buffer
+ 69: def get_project_dir():
+ 70:     if "project_dir" in st.session_state:
+ 71:         return st.session_state.project_dir
+ 72:     env_dir = os.environ.get("DENARIO_PROJECT_DIR")
+ 73:     if env_dir:
+ 74:         os.makedirs(env_dir, exist_ok=True)
+ 75:         st.session_state.project_dir = env_dir
+ 76:         return st.session_state.project_dir
+ 77:     temp_dir = f"project_dir_{uuid.uuid4().hex}"
+ 78:     os.makedirs(temp_dir, exist_ok=True)
+ 79:     st.session_state.project_dir = temp_dir
+ 80:     return st.session_state.project_dir
+ 81: class StreamToBuffer(io.StringIO):
+ 82:     def __init__(self, update_callback):
+ 83:         super().__init__()
+ 84:         self.update_callback = update_callback
+ 85:     def write(self, s):
+ 86:         super().write(s)
+ 87:         self.seek(0)
+ 88:         self.update_callback(self.read())
+ 89:         self.seek(0, io.SEEK_END)
+ 90: @contextmanager
+ 91: def stream_to_streamlit(container):
+ 92:     buffer = StreamToBuffer(update_callback=lambda text: container.markdown(
+ 93:         f'<div class="log-box">{text.replace("\\n", "<br>")}</div>',
+ 94:         unsafe_allow_html=True
+ 95:     ))
+ 96:     old_stdout = sys.stdout
+ 97:     sys.stdout = buffer
+ 98:     try:
+ 99:         yield
+100:     finally:
+101:         sys.stdout = old_stdout
+102: def get_latest_mtime_in_folder(folder_path: str) -> float:
+103:     latest_mtime = os.path.getmtime(folder_path)
+104:     for root, dirs, files in os.walk(folder_path):
+105:         for name in files + dirs:
+106:             full_path = os.path.join(root, name)
+107:             try:
+108:                 mtime = os.path.getmtime(full_path)
+109:                 if mtime > latest_mtime:
+110:                     latest_mtime = mtime
+111:             except FileNotFoundError:
+112:                 continue
+113:     return latest_mtime
+114: def delete_old_folders(days_old: int = 1):
+115:     now = time.time()
+116:     cutoff = now - (days_old * 86400)
+117:     for entry in os.listdir('.'):
+118:         if os.path.isdir(entry) and entry.startswith("project_dir_"):
+119:             latest_mtime = get_latest_mtime_in_folder(entry)
+120:             if latest_mtime < cutoff:
+121:                 shutil.rmtree(entry)
+</file>
+
+<file path="denario_app.egg-info/dependency_links.txt">
+1: 
+</file>
+
+<file path="denario_app.egg-info/PKG-INFO">
+ 1: Metadata-Version: 2.4
+ 2: Name: denario_app
+ 3: Version: 0.1.4
+ 4: Summary: GUI for Denario
+ 5: Requires-Python: >=3.12
+ 6: Description-Content-Type: text/markdown
+ 7: Requires-Dist: streamlit
+ 8: Requires-Dist: streamlit-pdf-viewer>=0.0.23
+ 9: Requires-Dist: denario@ file:///data/cmbagents/Denario
+10: 
+11: # DenarioApp
+12: 
+13: GUI for [Denario](https://github.com/AstroPilot-AI/Denario.git), powered by [streamlit](https://streamlit.io).
+14: 
+15: [Test a deployed demo of this app in HugginFace Spaces.](https://huggingface.co/spaces/astropilot-ai/Denario)
+16: 
+17: <img width="1793" height="694" alt="Screenshot from 2025-09-10 18-30-46" src="https://github.com/user-attachments/assets/2c524601-13ff-492b-addb-173323aaa15b" />
+18: 
+19: ## Run locally
+20: 
+21: Install the GUI from source following one of the following steps.
+22: 
+23: 1. Install with pip
+24: 
+25:    ```bash
+26:    pip install -e .
+27:    ```
+28: 
+29: 2. Install with [uv](https://docs.astral.sh/uv/)
+30: 
+31:    ```bash
+32:    uv sync
+33:    ```
+34: 
+35: Run the app with:
+36: 
+37: ```bash
+38: denario run
+39: ```
+40: 
+41: ## Run in Docker
+42: 
+43: You may need `sudo` permission [or use this link](https://docs.docker.com/engine/install/linux-postinstall/). To build the docker run:
+44: 
+45: ```bash
+46: docker build -t denario-app .
+47: ```
+48: 
+49: To run the app:
+50: 
+51: ```bash
+52: docker run -p 8501:8501 --rm \
+53:     -v $(pwd)/project_app:/app/project_app \
+54:     -v $(pwd)/data:/app/data \
+55:     -v $(pwd).env/app/.env \
+56:     denario-app
+57: ```
+58: 
+59: That command exposes the default streamlit port `8501`, change it to use a different port. You can mount additional volumes to share data with the docker using the `-v` flag. The above command shares the `project_app` folder, where the project files are generated, a `data` folder, where the required data would be present, and a `.env` file with the API keys (so no need to parse them manually). To run the docker in interactive mode, add the flag `-it` and `bash` at the end of the command.
+60: 
+61: You can also use [docker compose](https://docs.docker.com/compose/), you can just run
+62: 
+63: ```bash
+64: docker compose up --watch
+65: ```
+66: 
+67: to build the image and run the container.
+</file>
+
+<file path="denario_app.egg-info/requires.txt">
+1: streamlit
+2: streamlit-pdf-viewer>=0.0.23
+3: denario@ file:///data/cmbagents/Denario
+</file>
+
+<file path="denario_app.egg-info/SOURCES.txt">
+ 1: README.md
+ 2: pyproject.toml
+ 3: src/denario_app/app.py
+ 4: src/denario_app/cli.py
+ 5: src/denario_app/components.py
+ 6: src/denario_app/constants.py
+ 7: src/denario_app/utils.py
+ 8: src/denario_app.egg-info/PKG-INFO
+ 9: src/denario_app.egg-info/SOURCES.txt
+10: src/denario_app.egg-info/dependency_links.txt
+11: src/denario_app.egg-info/requires.txt
+12: src/denario_app.egg-info/top_level.txt
+</file>
+
+<file path="denario_app.egg-info/top_level.txt">
+1: denario_app
+</file>
+
+</files>
