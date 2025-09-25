@@ -1,14 +1,38 @@
 # DenarioApp
 
-GUI for [Denario](https://github.com/AstroPilot-AI/Denario.git), powered by [streamlit](https://streamlit.io).
+DenarioApp is the GUI for multiagent research assitant system [Denario](https://github.com/AstroPilot-AI/Denario.git), powered by [streamlit](https://streamlit.io).
 
 [Test a deployed demo of this app in HugginFace Spaces.](https://huggingface.co/spaces/astropilot-ai/Denario)
 
-<img width="1793" height="694" alt="Screenshot from 2025-09-10 18-30-46" src="https://github.com/user-attachments/assets/2c524601-13ff-492b-addb-173323aaa15b" />
+<img width="100%" alt="DenarioApp GUI" src="https://github.com/user-attachments/assets/2c524601-13ff-492b-addb-173323aaa15b" />
 
-## Run locally
+## Launch the GUI
 
-Install the GUI from source following one of the following steps.
+Install the app with
+
+```bash
+pip install "denario[app]"
+```
+
+or, if Denario is already installed, do:
+
+```bash
+pip install denario_app
+```
+
+Then, launch the app with
+
+```bash
+denario run
+```
+
+## Build the GUI from source
+
+First, clone the app with
+
+`git clone https://github.com/AstroPilot-AI/DenarioApp.git`
+
+Install the GUI from source following one of the following steps:
 
 1. Install with pip
 
@@ -28,9 +52,15 @@ Run the app with:
 denario run
 ```
 
+or
+
+```bash
+streamlit run src/denario_app/app.py
+```
+
 ## Run in Docker
 
-You may need `sudo` permission [or use this link](https://docs.docker.com/engine/install/linux-postinstall/). To build the docker run:
+You can run Denario and its GUI in a Docker container. Clone the [app repo](https://github.com/AstroPilot-AI/DenarioApp) and move to the folder. You may need `sudo` permission [or use this link](https://docs.docker.com/engine/install/linux-postinstall/). To build the docker run:
 
 ```bash
 docker build -t denario-app .
@@ -55,3 +85,17 @@ docker compose up --watch
 ```
 
 to build the image and run the container.
+
+## Contributing
+
+Pull requests are welcome! Feel free to open an issue for bugs, comments, questions and suggestions.
+
+## License
+
+[GNU GENERAL PUBLIC LICENSE (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html)
+
+Denario - Copyright (C) 2025 Pablo Villanueva-Domingo, Francisco Villaescusa-Navarro, Boris Bolliet
+
+## Contact and Enquieries
+
+E-mail: [denario.astropilot.ai@gmail.com](mailto:denario.astropilot.ai@gmail.com)

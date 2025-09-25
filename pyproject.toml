@@ -1,8 +1,12 @@
 [project]
 name = "denario_app"
-version = "0.1.4"
-description = "GUI for Denario"
+version = "0.1.7"
+description = "GUI for the multiagent research assistant Denario"
+maintainers = [
+  { name = "Denario", email = "denario.astropilot.ai@gmail.com" },
+]
 readme = "README.md"
+license = { text = "GPLv3" }
 requires-python = ">=3.12"
 dependencies = [
     "streamlit",
